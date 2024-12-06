@@ -4,6 +4,7 @@ from typing import Any
 
 from ._results import Results
 
+
 class BaseAnalysis:
     """Base class for analysis pipelines.
 

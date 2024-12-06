@@ -1,7 +1,7 @@
-
 import functools
 import inspect
 from typing import Any, Optional
+
 
 class AnalysisStep:
     """Decorator to register analysis steps and their results."""
@@ -92,7 +92,7 @@ class AnalysisStep:
             return result
 
         # Store metadata about the step
-        wrapper.creates = self.creates      # type: ignore
-        wrapper.requires = self.requires    # type: ignore
+        wrapper.creates = self.creates  # type: ignore
+        wrapper.requires = self.requires  # type: ignore
 
         return wrapper
