@@ -1,6 +1,6 @@
 import yaflux as yf
 
-class MyAnalysis(yf.BaseAnalysis):
+class MyAnalysis(yf.Base):
 
     @yf.step(creates="res_a")
     def step_a(self) -> dict[str, int]:

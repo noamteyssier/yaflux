@@ -1,7 +1,7 @@
 import yaflux as yf
 from _utils import _assert_in_order, _assert_out_of_order
 
-class DirectedAnalysis(yf.BaseAnalysis):
+class DirectedAnalysis(yf.Base):
     """This is a testing analysis class to model analysis steps.
 
     This class is used to test the functionality of the analysis steps and the

@@ -1,6 +1,6 @@
 import yaflux as yf
 
-class CreateTesting(yf.BaseAnalysis):
+class CreateTesting(yf.Base):
     """This class tests step API."""
 
     @yf.step()

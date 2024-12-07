@@ -19,7 +19,7 @@ yaflux provides a structured approach to managing complex data analysis pipeline
 ```python
 import yaflux as yf
 
-class MyAnalysis(yf.BaseAnalysis):
+class MyAnalysis(yf.Base):
 
     @yf.step(creates="processed_data", requires="raw_data")
     def process_data(self):

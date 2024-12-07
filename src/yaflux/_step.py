@@ -2,7 +2,7 @@ import functools
 import inspect
 from typing import Any, Callable, Optional, TypeVar
 
-from yaflux._base import BaseAnalysis
+from yaflux._base import Base
 
 T = TypeVar('T')
 
@@ -12,20 +12,20 @@ def _normalize_list(value: Optional[list[str] | str]) -> list[str]:
         return [value]
     return value or []
 
-def _validate_instance_method(args: tuple) -> tuple[BaseAnalysis, tuple]:
+def _validate_instance_method(args: tuple) -> tuple[Base, tuple]:
     """Ensure the decorated function is called as instance method."""
-    if not args or not isinstance(args[0], BaseAnalysis):
+    if not args or not isinstance(args[0], Base):
         raise ValueError("Analysis steps must be called as instance methods")
     return args[0], args[1:]
 
-def _check_requirements(analysis: BaseAnalysis, requires: list[str]) -> None:
+def _check_requirements(analysis: Base, requires: list[str]) -> None:
     """Validate that all required results exist."""
     missing = [req for req in requires if not hasattr(analysis._results, req)]
     if missing:
         raise ValueError(f"Missing required results: {missing}. Run required steps first.")
 
 def _handle_existing_attributes(
-    analysis: BaseAnalysis,
+    analysis: Base,
     creates: list[str],
     force: bool,
     panic: bool
@@ -43,7 +43,7 @@ def _handle_existing_attributes(
     return None
 
 def _store_results(
-    analysis: BaseAnalysis,
+    analysis: Base,
     creates: list[str],
     result: Any
 ) -> None:

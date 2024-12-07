@@ -5,7 +5,7 @@ from typing import Any
 from ._results import Results
 
 
-class BaseAnalysis:
+class Base:
     """Base class for analysis pipelines.
 
     This class provides a framework for defining and executing analysis pipelines.

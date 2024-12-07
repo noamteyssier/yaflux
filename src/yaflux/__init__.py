@@ -1,5 +1,5 @@
 
-from ._base import BaseAnalysis
+from ._base import Base
 from ._step import step
 
-__all__ = ["BaseAnalysis", "step"]
+__all__ = ["Base", "step"]

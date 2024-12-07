@@ -1,6 +1,6 @@
 import yaflux as yf
 
-class RequireTesting(yf.BaseAnalysis):
+class RequireTesting(yf.Base):
     @yf.step(creates="dep_a")
     def dep_a(self) -> dict[str, int]:
         return {"dep_a": 42}

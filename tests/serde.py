@@ -1,7 +1,7 @@
 import os
 import yaflux as yf
 
-class SerdeTesting(yf.BaseAnalysis):
+class SerdeTesting(yf.Base):
     """This class tests serialization and deserialization."""
 
     @yf.step(creates="res_a")
