@@ -22,10 +22,8 @@ from yaflux.decorators import AnalysisStep
 from typing import Any
 
 class MyAnalysis(BaseAnalysis):
-    @AnalysisStep(
-        creates=["processed_data"],
-        requires=["raw_data"]
-    )
+
+    @AnalysisStep(creates="processed_data", requires="raw_data")
     def process_data(self) -> dict[str, Any]:
         # Process data here
         return {"processed_data": processed_result}
