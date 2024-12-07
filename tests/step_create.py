@@ -1,21 +1,21 @@
-from yaflux import BaseAnalysis, step
+import yaflux as yf
 
-class CreateTesting(BaseAnalysis):
+class CreateTesting(yf.BaseAnalysis):
     """This class tests step API."""
 
-    @step()
+    @yf.step()
     def create_null(self):
         pass
 
-    @step(creates="creates_as_str")
+    @yf.step(creates="creates_as_str")
     def creates_as_str(self) -> dict[str, int]:
         return {"creates_as_str": 42}
 
-    @step(creates=["creates_as_list_singular"])
+    @yf.step(creates=["creates_as_list_singular"])
     def creates_as_list_singular(self) -> dict[str, int]:
         return {"creates_as_list_singular": 42}
 
-    @step(creates=["creates_as_list_multiple_a", "creates_as_list_multiple_b"])
+    @yf.step(creates=["creates_as_list_multiple_a", "creates_as_list_multiple_b"])
     def creates_as_list_multiple(self) -> dict[str, int]:
         return {"creates_as_list_multiple_a": 42, "creates_as_list_multiple_b": 42}
 

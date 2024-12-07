@@ -1,12 +1,12 @@
-from yaflux import BaseAnalysis, step
+import yaflux as yf
 
-class MyAnalysis(BaseAnalysis):
+class MyAnalysis(yf.BaseAnalysis):
 
-    @step(creates="res_a")
+    @yf.step(creates="res_a")
     def step_a(self) -> dict[str, int]:
         return {"res_a": 42}
 
-    @step(creates="res_b")
+    @yf.step(creates="res_b")
     def step_b(self) -> dict[str, int]:
         return {"res_b": 42}
 

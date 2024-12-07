@@ -17,11 +17,11 @@ yaflux provides a structured approach to managing complex data analysis pipeline
 ## Example Usage
 
 ```python
-from yaflux import BaseAnalysis, step
+import yaflux as yf
 
-class MyAnalysis(BaseAnalysis):
+class MyAnalysis(yf.BaseAnalysis):
 
-    @step(creates="processed_data", requires="raw_data")
+    @yf.step(creates="processed_data", requires="raw_data")
     def process_data(self):
         # Process data here
         return {"processed_data": processed_result}

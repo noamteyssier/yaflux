@@ -1,7 +1,7 @@
-from yaflux import BaseAnalysis, step
+import yaflux as yf
 from _utils import _assert_in_order, _assert_out_of_order
 
-class LinearAnalysis(BaseAnalysis):
+class LinearAnalysis(yf.BaseAnalysis):
     """This is a testing analysis class to model analysis steps.
 
     This class is used to test the functionality of the analysis steps and the
@@ -14,15 +14,15 @@ class LinearAnalysis(BaseAnalysis):
         lin_a -> lin_b -> lin_c
     """
 
-    @step(creates="res_a")
+    @yf.step(creates="res_a")
     def lin_a(self) -> dict[str, int]:
         return {"res_a": 42}
 
-    @step(creates="res_b", requires="res_a")
+    @yf.step(creates="res_b", requires="res_a")
     def lin_b(self) -> dict[str, int]:
         return {"res_b": 42}
 
-    @step(creates="res_c", requires="res_b")
+    @yf.step(creates="res_c", requires="res_b")
     def lin_c(self) -> dict[str, int]:
         return {"res_c": 42}
 
