@@ -22,7 +22,7 @@ import yaflux as yf
 class MyAnalysis(yf.Base):
 
     @yf.step(creates="processed_data", requires="raw_data")
-    def process_data(self):
+    def process_data(self) -> typing.Any:
         # Process data here
         return {"processed_data": processed_result}
 ```
