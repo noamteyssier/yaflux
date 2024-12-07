@@ -6,12 +6,12 @@ class SerdeTesting(yf.Base):
     """This class tests serialization and deserialization."""
 
     @yf.step(creates="res_a")
-    def step_a(self) -> dict[str, int]:
-        return {"res_a": 42}
+    def step_a(self) -> int:
+        return 42
 
     @yf.step(creates="res_b")
-    def step_b(self) -> dict[str, int]:
-        return {"res_b": 42}
+    def step_b(self) -> int:
+        return 42
 
 
 def test_serde():

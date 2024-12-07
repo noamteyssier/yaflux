@@ -16,16 +16,16 @@ class LinearAnalysis(yf.Base):
     """
 
     @yf.step(creates="res_a")
-    def lin_a(self) -> dict[str, int]:
-        return {"res_a": 42}
+    def lin_a(self) -> int:
+        return 42
 
     @yf.step(creates="res_b", requires="res_a")
-    def lin_b(self) -> dict[str, int]:
-        return {"res_b": 42}
+    def lin_b(self) -> int:
+        return 42
 
     @yf.step(creates="res_c", requires="res_b")
-    def lin_c(self) -> dict[str, int]:
-        return {"res_c": 42}
+    def lin_c(self) -> int:
+        return 42
 
 
 def test_linear_analysis():

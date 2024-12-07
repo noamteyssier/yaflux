@@ -9,12 +9,12 @@ class CreateTesting(yf.Base):
         pass
 
     @yf.step(creates="creates_as_str")
-    def creates_as_str(self) -> dict[str, int]:
-        return {"creates_as_str": 42}
+    def creates_as_str(self) -> int:
+        return 42
 
     @yf.step(creates=["creates_as_list_singular"])
-    def creates_as_list_singular(self) -> dict[str, int]:
-        return {"creates_as_list_singular": 42}
+    def creates_as_list_singular(self) -> int:
+        return 42
 
     @yf.step(creates=["creates_as_list_multiple_a", "creates_as_list_multiple_b"])
     def creates_as_list_multiple(self) -> dict[str, int]:
@@ -23,6 +23,10 @@ class CreateTesting(yf.Base):
     @yf.step(creates="creates_return_type_singular")
     def creates_return_type_singular(self) -> int:
         return 42
+
+    @yf.step(creates="creates_return_type_dict")
+    def creates_return_type_datastruct(self) -> dict[str, int]:
+        return {"creates_return_type_dict": 42}
 
 
 def test_create_null():

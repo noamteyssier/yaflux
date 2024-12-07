@@ -3,12 +3,12 @@ import yaflux as yf
 
 class RequireTesting(yf.Base):
     @yf.step(creates="dep_a")
-    def dep_a(self) -> dict[str, int]:
-        return {"dep_a": 42}
+    def dep_a(self) -> int:
+        return 42
 
     @yf.step(creates="dep_b")
-    def dep_b(self) -> dict[str, int]:
-        return {"dep_b": 42}
+    def dep_b(self) -> int:
+        return 42
 
     @yf.step(requires="dep_a")
     def requires_as_str(self):

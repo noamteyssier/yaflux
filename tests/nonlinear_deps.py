@@ -23,32 +23,32 @@ class DirectedAnalysis(yf.Base):
     """
 
     @yf.step(creates="res_a1")
-    def dag_a1(self) -> dict[str, int]:
-        return {"res_a1": 42}
+    def dag_a1(self) -> int:
+        return 42
 
     @yf.step(creates="res_b1", requires="res_a1")
-    def dag_b1(self) -> dict[str, int]:
-        return {"res_b1": 42}
+    def dag_b1(self) -> int:
+        return 42
 
     @yf.step(creates="res_c1", requires="res_b1")
-    def dag_c1(self) -> dict[str, int]:
-        return {"res_c1": 42}
+    def dag_c1(self) -> int:
+        return 42
 
     @yf.step(creates="res_b2", requires="res_a1")
-    def dag_b2(self) -> dict[str, int]:
-        return {"res_b2": 42}
+    def dag_b2(self) -> int:
+        return 42
 
     @yf.step(creates="res_c2", requires="res_b2")
-    def dag_c2(self) -> dict[str, int]:
-        return {"res_c2": 42}
+    def dag_c2(self) -> int:
+        return 42
 
     @yf.step(creates="res_c3", requires="res_b2")
-    def dag_c3(self) -> dict[str, int]:
-        return {"res_c3": 42}
+    def dag_c3(self) -> int:
+        return 42
 
     @yf.step(creates="res_d1", requires=["res_c2", "res_c3"])
-    def dag_d1(self) -> dict[str, int]:
-        return {"res_d1": 42}
+    def dag_d1(self) -> int:
+        return 42
 
 
 def test_directed_analysis():
