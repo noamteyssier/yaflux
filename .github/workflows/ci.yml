@@ -13,10 +13,6 @@ jobs:
 
   formatting:
     runs-on: "ubuntu-latest"
-    strategy:
-      max-parallel: 5
-      matrix:
-        python-version: ["3.12"]
 
     steps:
       - uses: actions/checkout@v4
@@ -39,10 +35,6 @@ jobs:
 
   linting:
     runs-on: "ubuntu-latest"
-    strategy:
-      max-parallel: 5
-      matrix:
-        python-version: ["3.12"]
 
     steps:
       - uses: actions/checkout@v4
