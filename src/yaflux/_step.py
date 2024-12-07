@@ -9,10 +9,15 @@ class AnalysisStep:
     """Decorator to register analysis steps and their results."""
 
     def __init__(
-        self, creates: Optional[list[str]] = None, requires: Optional[list[str]] = None
+        self, creates: Optional[list[str] | str] = None, requires: Optional[list[str] | str] = None
     ):
         self.creates = creates or []
         self.requires = requires or []
+
+        if isinstance(self.creates, str):
+            self.creates = [self.creates]
+        if isinstance(self.requires, str):
+            self.requires = [self.requires]
 
     def _validate_requirements(self, analysis_obj):
         """Validate that required results (dependencies) exist."""
