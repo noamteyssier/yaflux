@@ -4,7 +4,7 @@ A declarative framework for managing complex analytical workflows in Python.
 
 ## Overview
 
-yaflux provides a structured approach to managing complex data analysis pipelines where tracking transformations, ensuring reproducibility, and maintaining clear provenance are essential. It offers a pure Python solution for declaring dependencies between analysis steps and managing results immutably.
+`yaflux` provides a structured approach to managing complex data analysis pipelines where tracking transformations, ensuring reproducibility, and maintaining clear provenance are essential. It offers a pure Python solution for declaring dependencies between analysis steps and managing results immutably.
 
 ## Key Features
 
@@ -29,7 +29,7 @@ class MyAnalysis(yf.Base):
 
 ## Design Philosophy
 
-yaflux was designed around several core principles:
+`yaflux` was designed around several core principles:
 
 1. **Python-Native**: Built to integrate seamlessly with existing Python analysis workflows
 2. **Explicit Dependencies**: Clear declaration of inputs and outputs for each analysis step
@@ -39,7 +39,7 @@ yaflux was designed around several core principles:
 
 ## Use Cases
 
-yaflux is particularly well-suited for:
+`yaflux` is particularly well-suited for:
 
 - Complex data analysis pipelines requiring clear provenance
 - Scientific computing workflows where reproducibility is critical
@@ -48,7 +48,7 @@ yaflux is particularly well-suited for:
 
 ## Implementation
 
-yaflux uses Python's type system and decorators to create a lightweight framework that enforces:
+`yaflux` uses Python's type system and decorators to create a lightweight framework that enforces:
 
 - Clear specification of dependencies between analysis steps
 - Protected storage of intermediate and final results
@@ -57,7 +57,7 @@ yaflux uses Python's type system and decorators to create a lightweight framewor
 
 ## Current Status
 
-Originally developed for single-cell sequencing analysis workflows at the Arc Institute, yaflux has been designed as a general-purpose framework suitable for any complex Python analysis requiring structured workflow management.
+Originally developed for single-cell sequencing analysis workflows at the Arc Institute, `yaflux` has been designed as a general-purpose framework suitable for any complex Python analysis requiring structured workflow management.
 
 ## Installation
 
