@@ -1,13 +1,13 @@
 import functools
 import inspect
-from typing import Any, Callable, Optional, TypeVar
+from typing import Any, Callable, Optional, TypeVar, Union
 
 from yaflux._base import Base
 
 T = TypeVar("T")
 
 
-def _normalize_list(value: Optional[list[str] | str]) -> list[str]:
+def _normalize_list(value: Optional[Union[list[str], str]]) -> list[str]:
     """Convert string or list input to normalized list."""
     if isinstance(value, str):
         return [value]
@@ -62,8 +62,8 @@ def _filter_valid_kwargs(func: Callable, kwargs: dict) -> dict:
 
 
 def step(
-    creates: Optional[list[str] | str] = None,
-    requires: Optional[list[str] | str] = None,
+    creates: Optional[Union[list[str], str]] = None,
+    requires: Optional[Union[list[str], str]] = None,
 ) -> Callable:
     """Decorator to register analysis steps and their results.
 
