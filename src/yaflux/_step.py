@@ -4,7 +4,8 @@ from typing import Any, Callable, Optional, TypeVar
 
 from yaflux._base import Base
 
-T = TypeVar('T')
+T = TypeVar("T")
+
 
 def _normalize_list(value: Optional[list[str] | str]) -> list[str]:
     """Convert string or list input to normalized list."""
@@ -12,23 +13,25 @@ def _normalize_list(value: Optional[list[str] | str]) -> list[str]:
         return [value]
     return value or []
 
+
 def _validate_instance_method(args: tuple) -> tuple[Base, tuple]:
     """Ensure the decorated function is called as instance method."""
     if not args or not isinstance(args[0], Base):
         raise ValueError("Analysis steps must be called as instance methods")
     return args[0], args[1:]
 
+
 def _check_requirements(analysis: Base, requires: list[str]) -> None:
     """Validate that all required results exist."""
     missing = [req for req in requires if not hasattr(analysis._results, req)]
     if missing:
-        raise ValueError(f"Missing required results: {missing}. Run required steps first.")
+        raise ValueError(
+            f"Missing required results: {missing}. Run required steps first."
+        )
+
 
 def _handle_existing_attributes(
-    analysis: Base,
-    creates: list[str],
-    force: bool,
-    panic: bool
+    analysis: Base, creates: list[str], force: bool, panic: bool
 ) -> Optional[dict[str, Any]]:
     """Handle cases where results already exist."""
     for attr in creates:
@@ -42,11 +45,8 @@ def _handle_existing_attributes(
                 return {attr: getattr(analysis._results, attr) for attr in creates}
     return None
 
-def _store_results(
-    analysis: Base,
-    creates: list[str],
-    result: Any
-) -> None:
+
+def _store_results(analysis: Base, creates: list[str], result: Any) -> None:
     """Store the function results in the analysis object."""
     if isinstance(result, dict):
         for attr, value in result.items():
@@ -54,14 +54,16 @@ def _store_results(
     elif result is not None and len(creates) == 1:
         setattr(analysis._results, creates[0], result)
 
+
 def _filter_valid_kwargs(func: Callable, kwargs: dict) -> dict:
     """Remove kwargs that aren't in the function signature."""
     sig = inspect.signature(func)
     return {k: v for k, v in kwargs.items() if k in sig.parameters}
 
+
 def step(
     creates: Optional[list[str] | str] = None,
-    requires: Optional[list[str] | str] = None
+    requires: Optional[list[str] | str] = None,
 ) -> Callable:
     """Decorator to register analysis steps and their results.
 
@@ -76,7 +78,6 @@ def step(
     requires_list = _normalize_list(requires)
 
     def decorator(func: Callable[..., T]) -> Callable[..., T]:
-
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> T:
             # Extract control flags
@@ -89,10 +90,7 @@ def step(
 
             # Handle existing results
             existing = _handle_existing_attributes(
-                analysis_obj,
-                creates_list,
-                force,
-                panic_on_existing
+                analysis_obj, creates_list, force, panic_on_existing
             )
             if existing is not None:
                 return existing  # type: ignore

@@ -1,6 +1,7 @@
 import yaflux as yf
 from _utils import _assert_in_order, _assert_out_of_order
 
+
 class LinearAnalysis(yf.Base):
     """This is a testing analysis class to model analysis steps.
 
@@ -26,12 +27,14 @@ class LinearAnalysis(yf.Base):
     def lin_c(self) -> dict[str, int]:
         return {"res_c": 42}
 
+
 def test_linear_analysis():
     analysis = LinearAnalysis(parameters=None)
 
     _assert_in_order(analysis, analysis.lin_a)
     _assert_in_order(analysis, analysis.lin_b)
     _assert_in_order(analysis, analysis.lin_c)
+
 
 def test_linear_analysis_out_of_order():
     analysis = LinearAnalysis(parameters=None)

@@ -1,6 +1,7 @@
 import os
 import yaflux as yf
 
+
 class SerdeTesting(yf.Base):
     """This class tests serialization and deserialization."""
 
@@ -11,6 +12,7 @@ class SerdeTesting(yf.Base):
     @yf.step(creates="res_b")
     def step_b(self) -> dict[str, int]:
         return {"res_b": 42}
+
 
 def test_serde():
     analysis = SerdeTesting(parameters=None)
@@ -35,6 +37,7 @@ def test_serde():
     assert "step_a" in reloaded.completed_steps
     assert "step_b" in reloaded.completed_steps
 
+
 def test_save_panic_on_found():
     analysis = SerdeTesting(parameters=None)
 
@@ -53,6 +56,7 @@ def test_save_panic_on_found():
     # Delete the file
     if os.path.exists("tmp.pkl"):
         os.remove("tmp.pkl")
+
 
 def test_save_overwrite():
     analysis = SerdeTesting(parameters=None)

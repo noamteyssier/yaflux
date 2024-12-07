@@ -1,6 +1,7 @@
 import yaflux as yf
 from _utils import _assert_in_order, _assert_out_of_order
 
+
 class DirectedAnalysis(yf.Base):
     """This is a testing analysis class to model analysis steps.
 
@@ -49,6 +50,7 @@ class DirectedAnalysis(yf.Base):
     def dag_d1(self) -> dict[str, int]:
         return {"res_d1": 42}
 
+
 def test_directed_analysis():
     analysis = DirectedAnalysis(parameters=None)
 
@@ -69,6 +71,7 @@ def test_directed_analysis():
     # Depends on Branch 2 and Branch 3
     _assert_in_order(analysis, analysis.dag_d1)
 
+
 def test_directed_analysis_out_of_order():
     analysis = DirectedAnalysis(parameters=None)
 
@@ -87,6 +90,7 @@ def test_directed_analysis_out_of_order():
     _assert_in_order(analysis, analysis.dag_c2)
     _assert_in_order(analysis, analysis.dag_c3)
     _assert_in_order(analysis, analysis.dag_d1)
+
 
 def test_partial_branch_execution():
     """Test that we can execute only one branch of the DAG."""
