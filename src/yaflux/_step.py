@@ -1,6 +1,8 @@
 import functools
 import inspect
-from typing import Any, Optional
+from typing import Optional
+
+from yaflux._base import BaseAnalysis
 
 
 class AnalysisStep:
@@ -61,7 +63,14 @@ class AnalysisStep:
         sig = inspect.signature(func)
 
         @functools.wraps(func)
-        def wrapper(analysis_obj, *args, **kwargs) -> dict[str, Any]:
+        def wrapper(*args, **kwargs):
+            # Determine if this is an instance method call
+            if args and isinstance(args[0], BaseAnalysis):
+                analysis_obj = args[0]
+                remaining_args = args[1:]
+            else:
+                raise ValueError("Analysis steps must be called as instance methods")
+
             # Extract `force` parameter from kwargs if present
             force = kwargs.pop("force", False)
             panic_on_existing = kwargs.pop("panic_on_existing", False)
@@ -81,7 +90,7 @@ class AnalysisStep:
                 return self._get_results(analysis_obj)
 
             # Run the analysis
-            result = func(analysis_obj, *args, **valid_kwargs)
+            result = func(analysis_obj, *remaining_args, **valid_kwargs)
 
             # Register new attributes
             self._store_results(analysis_obj, result)
@@ -94,5 +103,4 @@ class AnalysisStep:
         # Store metadata about the step
         wrapper.creates = self.creates  # type: ignore
         wrapper.requires = self.requires  # type: ignore
-
         return wrapper
