@@ -1,4 +1,4 @@
-from yaflux import BaseAnalysis, AnalysisStep
+from yaflux import BaseAnalysis, step
 from _utils import _assert_in_order, _assert_out_of_order
 
 class DirectedAnalysis(BaseAnalysis):
@@ -21,31 +21,31 @@ class DirectedAnalysis(BaseAnalysis):
 
     """
 
-    @AnalysisStep(creates="res_a1")
+    @step(creates="res_a1")
     def dag_a1(self) -> dict[str, int]:
         return {"res_a1": 42}
 
-    @AnalysisStep(creates="res_b1", requires="res_a1")
+    @step(creates="res_b1", requires="res_a1")
     def dag_b1(self) -> dict[str, int]:
         return {"res_b1": 42}
 
-    @AnalysisStep(creates="res_c1", requires="res_b1")
+    @step(creates="res_c1", requires="res_b1")
     def dag_c1(self) -> dict[str, int]:
         return {"res_c1": 42}
 
-    @AnalysisStep(creates="res_b2", requires="res_a1")
+    @step(creates="res_b2", requires="res_a1")
     def dag_b2(self) -> dict[str, int]:
         return {"res_b2": 42}
 
-    @AnalysisStep(creates="res_c2", requires="res_b2")
+    @step(creates="res_c2", requires="res_b2")
     def dag_c2(self) -> dict[str, int]:
         return {"res_c2": 42}
 
-    @AnalysisStep(creates="res_c3", requires="res_b2")
+    @step(creates="res_c3", requires="res_b2")
     def dag_c3(self) -> dict[str, int]:
         return {"res_c3": 42}
 
-    @AnalysisStep(creates="res_d1", requires=["res_c2", "res_c3"])
+    @step(creates="res_d1", requires=["res_c2", "res_c3"])
     def dag_d1(self) -> dict[str, int]:
         return {"res_d1": 42}
 

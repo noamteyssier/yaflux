@@ -1,15 +1,15 @@
 import os
 
-from yaflux import BaseAnalysis, AnalysisStep
+from yaflux import BaseAnalysis, step
 
 class SerdeTesting(BaseAnalysis):
     """This class tests serialization and deserialization."""
 
-    @AnalysisStep(creates="res_a")
+    @step(creates="res_a")
     def step_a(self) -> dict[str, int]:
         return {"res_a": 42}
 
-    @AnalysisStep(creates="res_b")
+    @step(creates="res_b")
     def step_b(self) -> dict[str, int]:
         return {"res_b": 42}
 

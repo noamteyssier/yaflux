@@ -1,23 +1,23 @@
-from yaflux import BaseAnalysis, AnalysisStep
+from yaflux import BaseAnalysis, step
 
 class RequireTesting(BaseAnalysis):
-    @AnalysisStep(creates="dep_a")
+    @step(creates="dep_a")
     def dep_a(self) -> dict[str, int]:
         return {"dep_a": 42}
 
-    @AnalysisStep(creates="dep_b")
+    @step(creates="dep_b")
     def dep_b(self) -> dict[str, int]:
         return {"dep_b": 42}
 
-    @AnalysisStep(requires="dep_a")
+    @step(requires="dep_a")
     def requires_as_str(self):
         pass
 
-    @AnalysisStep(requires=["dep_a"])
+    @step(requires=["dep_a"])
     def requires_as_list_singular(self):
         pass
 
-    @AnalysisStep(requires=["dep_a", "dep_b"])
+    @step(requires=["dep_a", "dep_b"])
     def requires_as_list_multiple(self):
         pass
 

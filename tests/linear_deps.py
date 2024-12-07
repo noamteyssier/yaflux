@@ -1,4 +1,4 @@
-from yaflux import BaseAnalysis, AnalysisStep
+from yaflux import BaseAnalysis, step
 from _utils import _assert_in_order, _assert_out_of_order
 
 class LinearAnalysis(BaseAnalysis):
@@ -14,15 +14,15 @@ class LinearAnalysis(BaseAnalysis):
         lin_a -> lin_b -> lin_c
     """
 
-    @AnalysisStep(creates="res_a")
+    @step(creates="res_a")
     def lin_a(self) -> dict[str, int]:
         return {"res_a": 42}
 
-    @AnalysisStep(creates="res_b", requires="res_a")
+    @step(creates="res_b", requires="res_a")
     def lin_b(self) -> dict[str, int]:
         return {"res_b": 42}
 
-    @AnalysisStep(creates="res_c", requires="res_b")
+    @step(creates="res_c", requires="res_b")
     def lin_c(self) -> dict[str, int]:
         return {"res_c": 42}
 

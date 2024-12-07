@@ -17,14 +17,12 @@ yaflux provides a structured approach to managing complex data analysis pipeline
 ## Example Usage
 
 ```python
-from yaflux import BaseAnalysis
-from yaflux.decorators import AnalysisStep
-from typing import Any
+from yaflux import BaseAnalysis, step
 
 class MyAnalysis(BaseAnalysis):
 
-    @AnalysisStep(creates="processed_data", requires="raw_data")
-    def process_data(self) -> dict[str, Any]:
+    @step(creates="processed_data", requires="raw_data")
+    def process_data(self):
         # Process data here
         return {"processed_data": processed_result}
 ```
