@@ -55,6 +55,7 @@ def test_create_as_list_multiple():
     assert analysis.results.creates_as_list_multiple_a == 42
     assert analysis.results.creates_as_list_multiple_b == 42
 
+
 def test_create_return_type_singular():
     analysis = CreateTesting(parameters=None)
     analysis.creates_return_type_singular()
