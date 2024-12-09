@@ -54,9 +54,23 @@ def _store_results(
     result: Any,
 ) -> None:
     """Store the function results in the analysis object."""
+
+    # If the result is a dictionary, unpack it into the results object
     if isinstance(result, dict):
+        # Assumes the keys of the dictionary are the names of the results
         for attr, value in result.items():
             setattr(analysis._results, attr, value)
+
+    # If the result is a tuple, unpack it into the results object
+    # Will assume that the order of the tuple is the same as the order of the creates list
+    elif isinstance(result, tuple):
+        if len(result) != len(creates):
+            raise ValueError("Tuple result must have the same length as the creates list")
+
+        for attr, value in zip(creates, result):
+            setattr(analysis._results, attr, value)
+
+    # Base base where the result is a single value
     elif result is not None and len(creates) == 1:
         setattr(analysis._results, creates[0], result)
 

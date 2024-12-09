@@ -24,6 +24,10 @@ class CreateTesting(yf.Base):
     def creates_return_type_singular(self) -> int:
         return 42
 
+    @yf.step(creates=["tuple_a", "tuple_b"])
+    def creates_return_type_unnamed_tuple(self) -> tuple[int, int]:
+        return (42, 42)
+
     @yf.step(creates="creates_return_type_dict")
     def creates_return_type_datastruct(self) -> dict[str, int]:
         return {"creates_return_type_dict": 42}
@@ -61,3 +65,10 @@ def test_create_return_type_singular():
     analysis.creates_return_type_singular()
     assert "creates_return_type_singular" in analysis.completed_steps
     assert analysis.results.creates_return_type_singular == 42
+
+def test_create_return_type_unnamed_tuple():
+    analysis = CreateTesting(parameters=None)
+    analysis.creates_return_type_unnamed_tuple()
+    assert "creates_return_type_unnamed_tuple" in analysis.completed_steps
+    assert analysis.results.tuple_a == 42
+    assert analysis.results.tuple_b == 42
