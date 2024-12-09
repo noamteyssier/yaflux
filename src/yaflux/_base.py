@@ -31,6 +31,7 @@ class Base:
     def __init__(self, parameters: Any):
         self._results = Results()
         self._completed_steps = set()
+        self._step_ordering = [] # Hidden attribute to store the order of performed steps
         self.parameters = parameters
 
     @property
@@ -78,16 +79,13 @@ class Base:
         return self._results.get_step_results(step_name)
 
     def metadata_report(self) -> list[dict[str, Any]]:
-        """Return the metadata for all completed steps.
-
-        Does not guarantee order of steps.
-        """
+        """Return the metadata for all completed steps."""
         return [
             {
                 "step": step,
                 **self.get_step_metadata(step).to_dict(),
             }
-            for step in self.completed_steps
+            for step in self._step_ordering
         ]
 
     def save(self, filepath: str, force=False):

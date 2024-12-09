@@ -142,6 +142,11 @@ def step(
 
             # Mark completion
             analysis_obj._completed_steps.add(step_name)
+
+            # Add to ordering if not already present
+            if step_name not in analysis_obj._step_ordering:
+                analysis_obj._step_ordering.append(step_name)
+
             return result
 
         # Store metadata
