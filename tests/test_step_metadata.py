@@ -131,3 +131,19 @@ def test_metadata_report_ordering():
     assert report[0]["step"] == "step_a"
     assert report[1]["step"] == "step_c"
     assert report[2]["step"] == "step_b"
+
+def test_metadata_report_ordering_rerun():
+    analysis = SomeAnalysis(parameters=None)
+    analysis.step_a()
+    analysis.step_c()
+    analysis.step_b()
+    analysis.step_a(force=True) # type: ignore
+    report = analysis.metadata_report()
+
+    # Only two steps run so far
+    assert len(report) == 3
+
+    # Check that the steps are in the order they were run
+    assert report[0]["step"] == "step_a"
+    assert report[1]["step"] == "step_c"
+    assert report[2]["step"] == "step_b"
