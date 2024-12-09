@@ -2,6 +2,7 @@ import os
 import pickle
 from typing import Any
 
+from ._metadata import Metadata
 from ._results import Results
 
 
@@ -30,6 +31,7 @@ class Base:
     def __init__(self, parameters: Any):
         self._results = Results()
         self._completed_steps = set()
+        self._step_ordering = []  # Hidden attribute to store the order of performed steps
         self.parameters = parameters
 
     @property
@@ -51,7 +53,7 @@ class Base:
         """List all completed steps for the analysis."""
         return list(self._completed_steps)
 
-    def get_step_info(self, step_name: str):
+    def get_step_info(self, step_name: str) -> dict:
         """Get information about a specific analysis step."""
         method = getattr(self.__class__, step_name)
         if not method or not hasattr(method, "creates"):
@@ -63,6 +65,34 @@ class Base:
             "requires": method.requires,
             "completed": step_name in self._completed_steps,
         }
+
+    def get_step_metadata(self, step_name: str) -> Metadata:
+        """Get the metadata for a specific analysis step."""
+        if step_name not in self._completed_steps:
+            raise ValueError(f"Step '{step_name}' has not been completed")
+        return self._results.get_step_metadata(step_name)
+
+    def get_step_results(self, step_name: str) -> Any:
+        """Get the results for a specific analysis step."""
+        if step_name not in self._completed_steps:
+            raise ValueError(f"Step '{step_name}' has not been completed")
+        return self._results.get_step_results(step_name)
+
+    def metadata_report(self) -> list[dict[str, Any]]:
+        """Return the metadata for all completed steps.
+
+        The report will be in the order that the steps were completed.
+
+        For steps which were run more than once their order will be in the order
+        they were run the first time.
+        """
+        return [
+            {
+                "step": step,
+                **self.get_step_metadata(step).to_dict(),
+            }
+            for step in self._step_ordering
+        ]
 
     def save(self, filepath: str, force=False):
         """Save the `Analysis` object to a file using pickle."""

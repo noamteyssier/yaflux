@@ -1,8 +1,23 @@
+from typing import Any
+
+from yaflux._metadata import Metadata
+
+
 class Results:
-    """Dynamic container for analysis results."""
+    """Dynamic container for analysis results.
+
+    Attributes
+    ----------
+    _data : dict[str, Any]
+        The results data. Indexed by the `creates` items in the step definition.
+
+    _metadata: dict[str, Metadata]
+        The metadata for each result. Indexed by the step name.
+    """
 
     def __init__(self):
         self._data = {}
+        self._metadata = {}
 
     def __getitem__(self, name):
         return self._data[name]
@@ -41,3 +56,19 @@ class Results:
 
     def __setstate__(self, state):
         self._data = state
+
+    def set_metadata(self, step_name: str, metadata: Metadata):
+        """Set the metadata for a result."""
+        self._metadata[step_name] = metadata
+
+    def get_step_metadata(self, step_name: str) -> Metadata:
+        """Get the metadata for a result."""
+        return self._metadata[step_name]
+
+    def get_step_results(self, step_name: str) -> dict[str, Any]:
+        """Get the results for a step."""
+        return {
+            k: v
+            for k, v in self._data.items()
+            if k in self._metadata[step_name].creates
+        }

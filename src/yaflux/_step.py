@@ -1,8 +1,10 @@
 import functools
 import inspect
+import time
 from typing import Any, Callable, Optional, TypeVar, Union
 
 from yaflux._base import Base
+from yaflux._metadata import Metadata
 
 T = TypeVar("T")
 
@@ -46,13 +48,26 @@ def _handle_existing_attributes(
     return None
 
 
-def _store_results(analysis: Base, creates: list[str], result: Any) -> None:
+def _store_results(
+    analysis: Base,
+    creates: list[str],
+    result: Any,
+) -> None:
     """Store the function results in the analysis object."""
     if isinstance(result, dict):
         for attr, value in result.items():
             setattr(analysis._results, attr, value)
     elif result is not None and len(creates) == 1:
         setattr(analysis._results, creates[0], result)
+
+
+def _store_metadata(
+    analysis: Base,
+    step_name: str,
+    metadata: Metadata,
+):
+    """Store the step metadata within the analysis object."""
+    analysis._results.set_metadata(step_name, metadata)
 
 
 def _filter_valid_kwargs(func: Callable, kwargs: dict) -> dict:
@@ -80,6 +95,9 @@ def step(
     def decorator(func: Callable[..., T]) -> Callable[..., T]:
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> T:
+            # Identify the step name
+            step_name = func.__name__
+
             # Extract control flags
             force = kwargs.pop("force", False)
             panic_on_existing = kwargs.pop("panic_on_existing", False)
@@ -95,13 +113,41 @@ def step(
             if existing is not None:
                 return existing  # type: ignore
 
-            # Execute and store
+            # Filter valid kwargs
             valid_kwargs = _filter_valid_kwargs(func, kwargs)
+
+            # Timestamp the start of the step
+            start_time = time.time()
+
+            # Execute the function
             result = func(analysis_obj, *remaining_args, **valid_kwargs)
+
+            # Record the elapsed time
+            elapsed = time.time() - start_time
+
+            # Build the metadata object
+            step_metadata = Metadata(
+                creates=creates_list,
+                requires=requires_list,
+                timestamp=start_time,
+                elapsed=elapsed,
+                args=[str(arg) for arg in remaining_args],
+                kwargs={k: str(v) for k, v in valid_kwargs.items()},
+            )
+
+            # Store the results
             _store_results(analysis_obj, creates_list, result)
 
+            # Store the metadata
+            _store_metadata(analysis_obj, step_name, step_metadata)
+
             # Mark completion
-            analysis_obj._completed_steps.add(func.__name__)
+            analysis_obj._completed_steps.add(step_name)
+
+            # Add to ordering if not already present
+            if step_name not in analysis_obj._step_ordering:
+                analysis_obj._step_ordering.append(step_name)
+
             return result
 
         # Store metadata
