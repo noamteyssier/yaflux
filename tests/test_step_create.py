@@ -113,15 +113,18 @@ def test_create_return_type_expected_tuple():
     analysis.creates_return_type_expected_tuple()
     assert analysis.results.expected_tuple == (42, 42)
 
+
 def test_create_return_type_datastruct():
     analysis = CreateTesting()
     analysis.creates_return_type_datastruct()
     assert analysis.results.inferred_key == 42
 
+
 def test_create_return_singular_dict():
     analysis = CreateTesting()
     analysis.creates_return_singular_dict()
     assert analysis.results.results_dict == {"a": 42, "b": 42}
+
 
 def test_create_return_superset_dict():
     analysis = CreateTesting()
