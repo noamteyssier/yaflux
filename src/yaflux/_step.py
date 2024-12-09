@@ -60,6 +60,7 @@ def _store_results(
     elif result is not None and len(creates) == 1:
         setattr(analysis._results, creates[0], result)
 
+
 def _store_metadata(
     analysis: Base,
     step_name: str,

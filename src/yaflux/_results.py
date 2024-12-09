@@ -67,4 +67,8 @@ class Results:
 
     def get_step_results(self, step_name: str) -> dict[str, Any]:
         """Get the results for a step."""
-        return {k: v for k, v in self._data.items() if k in self._metadata[step_name].creates}
+        return {
+            k: v
+            for k, v in self._data.items()
+            if k in self._metadata[step_name].creates
+        }

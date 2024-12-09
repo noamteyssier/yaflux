@@ -31,7 +31,7 @@ class Base:
     def __init__(self, parameters: Any):
         self._results = Results()
         self._completed_steps = set()
-        self._step_ordering = [] # Hidden attribute to store the order of performed steps
+        self._step_ordering = []  # Hidden attribute to store the order of performed steps
         self.parameters = parameters
 
     @property
