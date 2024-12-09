@@ -78,6 +78,19 @@ class Base:
             raise ValueError(f"Step '{step_name}' has not been completed")
         return self._results.get_step_results(step_name)
 
+    def metadata_report(self) -> list[dict[str, Any]]:
+        """Return the metadata for all completed steps.
+
+        Does not guarantee order of steps.
+        """
+        return [
+            {
+                "step": step,
+                **self.get_step_metadata(step).to_dict(),
+            }
+            for step in self.completed_steps
+        ]
+
     def save(self, filepath: str, force=False):
         """Save the `Analysis` object to a file using pickle."""
         if not force and os.path.exists(filepath):

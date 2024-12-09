@@ -1,4 +1,3 @@
-
 from dataclasses import dataclass
 
 
@@ -23,3 +22,6 @@ class Metadata:
 
     # The named arguments for this step
     kwargs: dict[str, str]
+
+    def to_dict(self):
+        return self.__dict__

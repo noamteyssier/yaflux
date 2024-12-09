@@ -86,3 +86,33 @@ def test_step_children():
     "some_other_data": 42,
     "some_more_data": 42
     }
+
+def test_metadata_report():
+    analysis = SomeAnalysis(parameters=None)
+    analysis.step_a()
+    analysis.step_c()
+    report = analysis.metadata_report()
+
+    # Only two steps run so far
+    assert len(report) == 2
+
+    # Check the metadata report for each step
+    for step in report:
+
+        # Check that the metadata report has the expected keys
+        assert "step" in step
+        assert "creates" in step
+        assert "requires" in step
+        assert "timestamp" in step
+        assert "elapsed" in step
+        assert "args" in step
+        assert "kwargs" in step
+
+        # Check that the metadata report has the expected value types
+        assert isinstance(step["step"], str)
+        assert isinstance(step["creates"], list)
+        assert isinstance(step["requires"], list)
+        assert isinstance(step["args"], list)
+        assert isinstance(step["kwargs"], dict)
+        assert isinstance(step["timestamp"], float)
+        assert isinstance(step["elapsed"], float)
