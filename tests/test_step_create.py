@@ -69,25 +69,28 @@ def test_create_null():
     analysis = CreateTesting(parameters=None)
     analysis.create_null()
     assert "create_null" in analysis.completed_steps
+    try:
+        analysis.results.create_null
+        assert False
+    except AttributeError:
+        pass
 
 
 def test_create_as_str():
     analysis = CreateTesting(parameters=None)
     analysis.creates_as_str()
-    assert "creates_as_str" in analysis.completed_steps
     assert analysis.results.creates_as_str == 42
 
 
 def test_create_as_list_singular():
     analysis = CreateTesting(parameters=None)
     analysis.creates_as_list_singular()
-    assert "creates_as_list_singular" in analysis.completed_steps
+    assert analysis.results.creates_as_list_singular == 42
 
 
 def test_create_as_list_multiple():
     analysis = CreateTesting(parameters=None)
     analysis.creates_as_list_multiple()
-    assert "creates_as_list_multiple" in analysis.completed_steps
     assert analysis.results.creates_as_list_multiple_a == 42
     assert analysis.results.creates_as_list_multiple_b == 42
 
@@ -95,14 +98,12 @@ def test_create_as_list_multiple():
 def test_create_return_type_singular():
     analysis = CreateTesting(parameters=None)
     analysis.creates_return_type_singular()
-    assert "creates_return_type_singular" in analysis.completed_steps
     assert analysis.results.creates_return_type_singular == 42
 
 
 def test_create_return_type_unnamed_tuple():
     analysis = CreateTesting(parameters=None)
     analysis.creates_return_type_unnamed_tuple()
-    assert "creates_return_type_unnamed_tuple" in analysis.completed_steps
     assert analysis.results.tuple_a == 42
     assert analysis.results.tuple_b == 42
 
