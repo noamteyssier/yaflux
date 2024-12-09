@@ -2,6 +2,8 @@ import os
 import pickle
 from typing import Any
 
+from yaflux._metadata import Metadata
+
 from ._results import Results
 
 
@@ -51,7 +53,7 @@ class Base:
         """List all completed steps for the analysis."""
         return list(self._completed_steps)
 
-    def get_step_info(self, step_name: str):
+    def get_step_info(self, step_name: str) -> dict:
         """Get information about a specific analysis step."""
         method = getattr(self.__class__, step_name)
         if not method or not hasattr(method, "creates"):
@@ -63,6 +65,18 @@ class Base:
             "requires": method.requires,
             "completed": step_name in self._completed_steps,
         }
+
+    def get_step_metadata(self, step_name: str) -> Metadata:
+        """Get the metadata for a specific analysis step."""
+        if step_name not in self._completed_steps:
+            raise ValueError(f"Step '{step_name}' has not been completed")
+        return self._results.get_step_metadata(step_name)
+
+    def get_step_results(self, step_name: str) -> Any:
+        """Get the results for a specific analysis step."""
+        if step_name not in self._completed_steps:
+            raise ValueError(f"Step '{step_name}' has not been completed")
+        return self._results.get_step_results(step_name)
 
     def save(self, filepath: str, force=False):
         """Save the `Analysis` object to a file using pickle."""
