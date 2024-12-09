@@ -13,8 +13,11 @@ A declarative framework for managing complex analytical workflows in Python.
 - **Dependency Tracking**: Automatic tracking of dependencies between analysis steps
 - **Progress Monitoring**: Built-in tracking of completed analysis steps
 - **Serialization**: Simple persistence of complete analysis states
+- **Portable Results**: Analysis results can be shared and loaded without original class definitions
 
 ## Example Usage
+
+### Defining and running an analysis
 
 ```python
 import yaflux as yf
@@ -25,7 +28,67 @@ class MyAnalysis(yf.Base):
     def process_data(self) -> typing.Any:
         # Process data here
         return {"processed_data": processed_result}
+
+# Run and save analysis
+analysis = MyAnalysis(parameters={...})
+analysis.process_data()
+
+# Access results
+results = analysis.results.processed_data
+
+# Save analysis state
+analysis.save("analysis.pkl")
 ```
+
+### Loading an analysis
+
+`yaflux` provides a simple way to load and access analysis results:
+
+```python
+import yaflux as yf
+
+# Load analysis as a Python object
+analysis = MyAnalysis.load("analysis.pkl")
+
+# Access results
+results = analysis.results.processed_data
+
+# View metadata
+print(analysis.available_steps)
+print(analysis.completed_steps)
+
+# Rerun analysis from a specific step
+analysis.process_data()
+```
+
+### Loading an analysis without original class definition
+
+`yaflux` provides support for sharing analysis results with collaborators who may not have access to your original analysis code.
+This is particularly useful when:
+
+- Sharing results with colleagues who don't need the full pipeline
+- Archiving analysis results for long-term storage
+- Making results available in environments where the original code cannot be installed
+
+```python
+import yaflux as yf
+
+# Load without original class definition
+portable = yf.load_portable("analysis.pkl")
+
+# Access results
+results = portable.results.processed_data
+
+# View metadata
+print(portable.available_steps)
+print(portable.completed_steps)
+```
+
+When loading portable results:
+
+- All results and metadata are preserved.
+- Step definitions are replaced with informative placeholders
+- Original class definition is not required
 
 ## Design Philosophy
 
@@ -54,10 +117,6 @@ class MyAnalysis(yf.Base):
 - Protected storage of intermediate and final results
 - Reproducible execution of analysis pipelines
 - Comprehensive tracking of analysis state
-
-## Current Status
-
-Originally developed for single-cell sequencing analysis workflows at the Arc Institute, `yaflux` has been designed as a general-purpose framework suitable for any complex Python analysis requiring structured workflow management.
 
 ## Installation
 
