@@ -79,7 +79,13 @@ class Base:
         return self._results.get_step_results(step_name)
 
     def metadata_report(self) -> list[dict[str, Any]]:
-        """Return the metadata for all completed steps."""
+        """Return the metadata for all completed steps.
+
+        The report will be in the order that the steps were completed.
+
+        For steps which were run more than once their order will be in the order
+        they were run the first time.
+        """
         return [
             {
                 "step": step,
