@@ -90,6 +90,27 @@ When loading portable results:
 - Step definitions are replaced with informative placeholders
 - Original class definition is not required
 
+### Exploring the metadata of an analysis
+
+`yaflux` stores runtime metadata about the analysis state to track step-level information.
+This lets you see how specific steps were run and collect runtime characteristics like timestamps and durations.
+
+```python
+import yaflux as yf
+
+# Load analysis as a Python object
+analysis = MyAnalysis(parameters=None)
+analysis.process_data()
+
+# View metadata (indexed by step name)
+step_metadata = analysis.get_step_metadata("process_data")
+print(step_metadata)
+
+# View a global report
+metadata_report = analysis.metadata_report()
+print(metadata_report)
+```
+
 ## Design Philosophy
 
 `yaflux` was designed around several core principles:
