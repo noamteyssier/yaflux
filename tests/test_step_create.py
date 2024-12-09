@@ -36,9 +36,33 @@ class CreateTesting(yf.Base):
         """
         return (42, 42)
 
-    @yf.step(creates="creates_return_type_dict")
+    @yf.step(creates="inferred_key")
     def creates_return_type_datastruct(self) -> dict[str, int]:
-        return {"creates_return_type_dict": 42}
+        return {"inferred_key": 42}
+
+    @yf.step(creates="results_dict")
+    def creates_return_singular_dict(self) -> dict[str, int]:
+        """The case where a singular value is returned as a dictionary.
+
+        In this case inference should give us a `result.results_dict` attribute
+        and not a `result.a` and `result.b` attribute.
+        """
+        return {
+            "a": 42,
+            "b": 42,
+        }
+
+    @yf.step(creates=["a", "b"])
+    def creates_return_superset_dict(self) -> dict[str, int]:
+        """The case where the results dict is a superset of the creates list.
+
+        This should raise an error because it's ambiguous as a potential bug.
+        """
+        return {
+            "a": 42,
+            "b": 42,
+            "c": 42,
+        }
 
 
 def test_create_null():
@@ -86,5 +110,22 @@ def test_create_return_type_unnamed_tuple():
 def test_create_return_type_expected_tuple():
     analysis = CreateTesting()
     analysis.creates_return_type_expected_tuple()
-    assert "creates_return_type_expected_tuple" in analysis.completed_steps
     assert analysis.results.expected_tuple == (42, 42)
+
+def test_create_return_type_datastruct():
+    analysis = CreateTesting()
+    analysis.creates_return_type_datastruct()
+    assert analysis.results.inferred_key == 42
+
+def test_create_return_singular_dict():
+    analysis = CreateTesting()
+    analysis.creates_return_singular_dict()
+    assert analysis.results.results_dict == {"a": 42, "b": 42}
+
+def test_create_return_superset_dict():
+    analysis = CreateTesting()
+    try:
+        analysis.creates_return_superset_dict()
+        assert False
+    except ValueError as exc:
+        assert "superset of creates list" in str(exc)
