@@ -48,11 +48,22 @@ def _handle_existing_attributes(
     return None
 
 
-def _store_dict_results(analysis: Base, result: dict[str, Any]) -> None:
+def _store_dict_results(analysis: Base, creates: list[str], result: dict[str, Any]) -> None:
     """Store the function results in the analysis object.
 
     Assumes the keys of the dictionary are the names of the results.
     """
+    # Case where the returned dictionary is missing keys from the creates list
+    for c in creates:
+        if c not in result:
+            raise ValueError(f"Missing result key: {c}")
+
+    # Case where the returned dictionary has unexpected keys not in the creates list
+    for attr in result:
+        if attr not in creates:
+            raise AttributeError(f"Unexpected result key: {attr}")
+
+    # Store the results in the analysis object
     for attr, value in result.items():
         setattr(analysis._results, attr, value)
 
@@ -89,7 +100,12 @@ def _store_results(
 
     # If the result is a dictionary, unpack it into the results object
     if isinstance(result, dict):
-        _store_dict_results(analysis, result)
+        try: # Try to store the dictionary results
+            _store_dict_results(analysis, creates, result)
+        except ValueError: # Case where the dictionary is missing keys from the creates list
+            _store_singular_result(analysis, creates, result)
+        except AttributeError: # Case where the dictionary has a superset of keys not in the creates list
+            raise ValueError("Unambiguous result keys in dictionary (superset of creates list)")
 
     # If the result is a tuple, unpack it into the results object
     elif isinstance(result, tuple):
