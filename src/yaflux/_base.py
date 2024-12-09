@@ -1,6 +1,6 @@
 import os
 import pickle
-from typing import Any
+from typing import Any, Optional
 
 from ._metadata import Metadata
 from ._results import Results
@@ -28,7 +28,7 @@ class Base:
         List all completed steps for the analysis.
     """
 
-    def __init__(self, parameters: Any):
+    def __init__(self, parameters: Optional[Any] = None):
         self._results = Results()
         self._completed_steps = set()
         self._step_ordering = []  # Hidden attribute to store the order of performed steps
