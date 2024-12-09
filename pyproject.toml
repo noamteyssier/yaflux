@@ -1,6 +1,6 @@
 [project]
 name = "yaflux"
-version = "0.1.0"
+version = "0.1.1"
 description = "A lightweight, declarative framework for python analysis workflows."
 readme = "README.md"
 authors = [
@@ -13,8 +13,4 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [dependency-groups]
-dev = [
-    "pyright>=1.1.390",
-    "pytest>=8.3.4",
-    "ruff>=0.8.2",
-]
+dev = ["pyright>=1.1.390", "pytest>=8.3.4", "ruff>=0.8.2"]
