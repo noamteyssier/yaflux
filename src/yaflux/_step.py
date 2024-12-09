@@ -48,17 +48,86 @@ def _handle_existing_attributes(
     return None
 
 
+def _store_dict_results(
+    analysis: Base, creates: list[str], result: dict[str, Any]
+) -> None:
+    """Store the function results in the analysis object.
+
+    Assumes the keys of the dictionary are the names of the results.
+    """
+    # Case where the returned dictionary is missing keys from the creates list
+    for c in creates:
+        if c not in result:
+            raise ValueError(f"Missing result key: {c}")
+
+    # Case where the returned dictionary has unexpected keys not in the creates list
+    for attr in result:
+        if attr not in creates:
+            raise AttributeError(f"Unexpected result key: {attr}")
+
+    # Store the results in the analysis object
+    for attr, value in result.items():
+        setattr(analysis._results, attr, value)
+
+
+def _store_inferred_tuple_results(
+    analysis: Base, creates: list[str], result: tuple
+) -> None:
+    """Store the function results in the analysis object.
+
+    Assumes the order of the tuple is the same as the order of the creates list.
+
+    Will panic if the length of the tuple doesn't match the length of the creates list.
+    """
+    if len(result) != len(creates):
+        raise ValueError("Tuple result must have the same length as the creates list")
+
+    for attr, value in zip(creates, result):
+        setattr(analysis._results, attr, value)
+
+
+def _store_singular_result(analysis: Base, creates: list[str], result: Any) -> None:
+    """Store the function results in the analysis object."""
+    if len(creates) != 1:
+        raise ValueError("Single result must have exactly one name in the creates list")
+    setattr(analysis._results, creates[0], result)
+
+
 def _store_results(
     analysis: Base,
     creates: list[str],
     result: Any,
 ) -> None:
     """Store the function results in the analysis object."""
+
+    # If the result is a dictionary, unpack it into the results object
     if isinstance(result, dict):
-        for attr, value in result.items():
-            setattr(analysis._results, attr, value)
+        try:  # Try to store the dictionary results
+            _store_dict_results(analysis, creates, result)
+        except (
+            ValueError
+        ):  # Case where the dictionary is missing keys from the creates list
+            _store_singular_result(analysis, creates, result)
+        except (
+            AttributeError
+        ):  # Case where the dictionary has a superset of keys not in the creates list
+            raise ValueError(
+                "Unambiguous result keys in dictionary (superset of creates list)"
+            )
+
+    # If the result is a tuple, unpack it into the results object
+    elif isinstance(result, tuple):
+        try:
+            _store_inferred_tuple_results(analysis, creates, result)
+
+        # Case where the tuple is not the same length as the creates list
+        # This means that the user is returning a singular value as a tuple
+        except ValueError:
+            _store_singular_result(analysis, creates, result)
+
+    # Base base where the result is a single value
     elif result is not None and len(creates) == 1:
-        setattr(analysis._results, creates[0], result)
+        _store_singular_result(analysis, creates, result)
 
 
 def _store_metadata(
