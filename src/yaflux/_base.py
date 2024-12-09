@@ -2,8 +2,7 @@ import os
 import pickle
 from typing import Any
 
-from yaflux._metadata import Metadata
-
+from ._metadata import Metadata
 from ._results import Results
 
 
