@@ -145,6 +145,50 @@ analysis.visualize_dependencies()
 
 ![Dependency Graph](docs/source/assets/complex_workflow_progress.svg)
 
+## Avoiding Dependency Errors
+
+One of the benefits of a declarative workflow is you can avoid a whole class of errors related to missing or incorrect dependencies.
+
+In `yaflux` you can specify dependencies between steps using the `requires` argument in the `@step` decorator.
+The `step` function parses the decorated method's abstract syntax tree (AST) to determine the dependencies and ensure they are met.
+
+This means that if you try to access a result that hasn't been created yet, `yaflux` will raise an error at initialization time rather than at runtime.
+
+The below code will raise an error at class definition time because `step_b` **uses** `z` but does not **require** it:
+
+```python
+import yaflux as yf
+
+class BadAnalysis(yf.Base):
+
+    @yf.step(creates="x")
+    def step_a(self) -> int:
+        return 1
+
+    @yf.step(creates="y") # Missing `z` in `requires`
+    def step_b(self) -> int:
+        return self.results.z + 1
+```
+
+This is especially useful when you have a typo in your analysis but don't realize it until much later in the workflow.
+`yaflux` acts as a static analysis tool for your analysis workflow, catching errors early and saving you time debugging.
+
+```python
+import yaflux as yf
+
+class BadAnalysis(yf.Base):
+
+    @yf.step(creates="some_complex_name")
+    def step_a(self) -> int:
+        return 1
+
+    @yf.step(creates="y", requires="some_complex_name") # Typo in `requires`
+    def step_b(self) -> int:
+        return self.results.some_complx_name + 1
+
+
+```
+
 ## Installation
 
 For a base python installation with zero external dependencies use:
