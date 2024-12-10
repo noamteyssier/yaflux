@@ -1,4 +1,5 @@
 import yaflux as yf
+from yaflux._results import Results, UnauthorizedMutationError
 
 
 class Analysis(yf.Base):
@@ -45,4 +46,12 @@ def test_immutable_del():
         del analysis.results["res_a"] # type: ignore
         assert False
     except TypeError:
+        pass
+
+def test_immutable_overwrite():
+    analysis = Analysis()
+    try:
+        analysis._results = Results()
+        assert False
+    except UnauthorizedMutationError:
         pass
