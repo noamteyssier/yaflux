@@ -1,6 +1,8 @@
 from typing import Any
 
-from yaflux._metadata import Metadata
+from .._metadata import Metadata
+from ._error import UnauthorizedMutationError
+from ._lock import ResultsLock
 
 
 class Results:
@@ -32,6 +34,10 @@ class Results:
             raise AttributeError(f"No result named '{name}' exists") from exc
 
     def __delattr__(self, name: str) -> None:
+        if not ResultsLock.can_mutate():
+            raise UnauthorizedMutationError(
+                "Results can only be modified within a step decorator"
+            )
         if name == "_data":
             raise AttributeError(f"Cannot delete attribute '{name}'")
         try:
@@ -40,6 +46,10 @@ class Results:
             raise AttributeError(f"No result named '{name}' exists") from exc
 
     def __setattr__(self, name, value):
+        if not ResultsLock.can_mutate():
+            raise UnauthorizedMutationError(
+                "Results can only be modified within a step decorator"
+            )
         if name == "_data":
             object.__setattr__(self, name, value)
         else:

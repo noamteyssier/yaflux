@@ -5,6 +5,7 @@ from typing import Any, Callable, Optional, TypeVar, Union
 
 from yaflux._base import Base
 from yaflux._metadata import Metadata
+from yaflux._results._lock import ResultsLock
 
 T = TypeVar("T")
 
@@ -39,7 +40,8 @@ def _handle_existing_attributes(
     for attr in creates:
         if hasattr(analysis._results, attr):
             if force:
-                delattr(analysis._results, attr)
+                with ResultsLock.allow_mutation():
+                    delattr(analysis._results, attr)
             elif panic:
                 raise ValueError(f"Attribute {attr} already exists!")
             else:
@@ -204,11 +206,12 @@ def step(
                 kwargs={k: str(v) for k, v in valid_kwargs.items()},
             )
 
-            # Store the results
-            _store_results(analysis_obj, creates_list, result)
+            with ResultsLock.allow_mutation():
+                # Store the results
+                _store_results(analysis_obj, creates_list, result)
 
-            # Store the metadata
-            _store_metadata(analysis_obj, step_name, step_metadata)
+                # Store the metadata
+                _store_metadata(analysis_obj, step_name, step_metadata)
 
             # Mark completion
             analysis_obj._completed_steps.add(step_name)

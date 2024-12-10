@@ -2,6 +2,8 @@ import os
 import pickle
 from typing import Any, Optional
 
+from yaflux._results._lock import ResultsLock
+
 from ._metadata import Metadata
 from ._results import Results
 
@@ -29,7 +31,8 @@ class Base:
     """
 
     def __init__(self, parameters: Optional[Any] = None):
-        self._results = Results()
+        with ResultsLock.allow_mutation():  # Unlock during initialization
+            self._results = Results()
         self._completed_steps = set()
         self._step_ordering = []  # Hidden attribute to store the order of performed steps
         self.parameters = parameters
@@ -104,6 +107,7 @@ class Base:
     @classmethod
     def load(cls, filepath: str):
         """Load an `Analysis` object from a file using pickle."""
-        with open(filepath, "rb") as file:
-            analysis = pickle.load(file)
+        with ResultsLock.allow_mutation():
+            with open(filepath, "rb") as file:
+                analysis = pickle.load(file)
         return analysis
