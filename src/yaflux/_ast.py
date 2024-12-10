@@ -1,14 +1,13 @@
 import ast
 import inspect
 import textwrap
-from typing import List, Set
 
 
 class ResultsAttributeVisitor(ast.NodeVisitor):
     """AST visitor that finds all self.results attribute accesses."""
 
     def __init__(self):
-        self.accessed_attrs: Set[str] = set()
+        self.accessed_attrs: set[str] = set()
 
     def visit_Attribute(self, node: ast.Attribute) -> None:
         """Visit attribute access nodes in the AST."""
@@ -50,30 +49,35 @@ def get_function_node(func) -> ast.FunctionDef:
 
 
 def validate_results_usage(
-    func_node: ast.FunctionDef, requires: List[str]
-) -> List[str]:
+    func_node: ast.FunctionDef, requires: list[str]
+) -> tuple[list[str], list[str]]:
     """
-    Validate that all self.results.{attr} accesses are declared in requires.
+    Validate that all self.results.{attr} accesses are declared in requires
+    and all requires are actually used.
 
     Parameters
     ----------
     func_node : ast.FunctionDef
         The AST node of the function definition
-    requires : List[str]
+    requires : list[str]
         List of required attributes declared in the step decorator
 
     Returns
     -------
-    List[str]
-        List of attribute names that are used but not declared in requires
+    tuple[list[str], list[str]]
+        First list contains undeclared attributes that are used
+        Second list contains declared attributes that are not used
     """
     visitor = ResultsAttributeVisitor()
     visitor.visit(func_node)
 
-    # Compare against requires list
+    # Find attributes used but not declared
     undeclared = [attr for attr in visitor.accessed_attrs if attr not in requires]
 
-    return undeclared
+    # Find attributes declared but not used
+    unused = [attr for attr in requires if attr not in visitor.accessed_attrs]
+
+    return undeclared, unused
 
 
 def validate_step_requirements(func, requires: list[str]) -> None:
@@ -84,7 +88,6 @@ def validate_step_requirements(func, requires: list[str]) -> None:
     ----------
     func : Callable
         The function to validate
-
     requires : list[str]
         List of required attributes declared in the step decorator
 
@@ -92,14 +95,31 @@ def validate_step_requirements(func, requires: list[str]) -> None:
     ------
     ValueError
         If any self.results attributes are accessed but not declared in requires
+    Warning
+        If any requires attributes are declared but not used
     """
     # Get the function AST node
     func_node = get_function_node(func)
 
-    # Validate
-    undeclared = validate_results_usage(func_node, requires)
+    # Validate usage
+    undeclared, unused = validate_results_usage(func_node, requires)
+
+    # Get the function name
+    func_name = func.__name__
+
+    # Raise error for undeclared attributes
     if undeclared:
         raise ValueError(
-            f"Accessing undeclared results attributes: {undeclared}. "
+            f"Accessing undeclared results attributes in {func_name}: {undeclared}. "
             f"Add these to the 'requires' parameter of the @step decorator."
+        )
+
+    # Warn about unused requirements
+    if unused:
+        import warnings
+
+        warnings.warn(
+            f"The following required attributes are never accessed in {func_name}: {unused}. "
+            f"Consider removing them from the 'requires' parameter.",
+            stacklevel=2,
         )
