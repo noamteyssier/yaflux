@@ -10,6 +10,7 @@ dependencies = []
 
 [project.optional-dependencies]
 viz = ["graphviz>=0.20.3"]
+full = ["yaflux[viz]"]
 
 [build-system]
 requires = ["hatchling"]
