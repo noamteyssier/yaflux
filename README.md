@@ -79,6 +79,72 @@ analysis.visualize_dependencies()
 metadata = analysis.get_step_metadata("workflow_step_b")
 ```
 
+## Visualizing Complex Workflows
+
+`yaflux` provides a built-in method for visualizing the dependencies between analysis steps.
+This can be useful for understanding complex workflows and ensuring that all dependencies are correctly specified.
+
+Let's first define a complex analysis with multiple steps and dependencies:
+
+```python
+import yaflux as yf
+
+
+class MyAnalysis(yf.Base):
+
+    @yf.step(creates=["x", "y", "z"])
+    def load_data(self) -> tuple[int, int, int]:
+        return 1, 2, 3
+
+    @yf.step(creates="proc_x", requires="x")
+    def process_x(self) -> int:
+        return self.results.x + 1
+
+    @yf.step(creates=["proc_y1", "proc_y2"], requires="y")
+    def process_y(self) -> tuple[int, int]:
+        return (
+            self.results.y + 1,
+            self.results.y + 2,
+        )
+
+    @yf.step(creates="proc_z", requires=["proc_y1", "proc_y2", "z"])
+    def process_z(self) -> int:
+        return self.results.proc_y1 + self.results.proc_y2 + self.results.z
+
+    @yf.step(creates="final", requires=["proc_x", "proc_z"])
+    def final(self) -> int:
+        return self.results.proc_x + self.results.proc_z
+
+    def run(self):
+        self.load_data()
+        self.process_x()
+        self.process_y()
+        self.process_z()
+        self.final()
+```
+
+Now we can visualize the dependencies between the analysis steps:
+
+```python
+analysis = MyAnalysis()
+analysis.visualize_dependencies()
+```
+
+![Dependency Graph](docs/source/assets/complex_workflow_init.svg)
+
+As we run the analysis, we can fill in the dependency graph and see where we are in the workflow.
+
+```python
+analysis.load_data()
+analysis.process_x()
+analysis.process_y()
+
+# Visualize the updated dependencies
+analysis.visualize_dependencies()
+```
+
+![Dependency Graph](docs/source/assets/complex_workflow_progress.svg)
+
 ## Installation
 
 For a base python installation with zero external dependencies use:
