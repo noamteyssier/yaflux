@@ -17,4 +17,13 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [dependency-groups]
-dev = ["pyright>=1.1.390", "pytest>=8.3.4", "ruff>=0.8.2"]
+dev = [
+    "myst-parser>=4.0.0",
+    "numpydoc>=1.8.0",
+    "pydata-sphinx-theme>=0.16.0",
+    "pyright>=1.1.390",
+    "pytest>=8.3.4",
+    "ruff>=0.8.2",
+    "sphinx-autodoc-typehints>=2.5.0",
+    "sphinx>=8.1.3",
+]
