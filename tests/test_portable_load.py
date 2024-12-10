@@ -1,7 +1,8 @@
 import os
-import yaflux as yf
 
 from _hidden import write_hidden_analysis
+
+import yaflux as yf
 
 
 class SimpleAnalysis(yf.Base):
@@ -24,6 +25,52 @@ def test_load_portable():
     try:
         # Load as portable
         portable = yf.load_analysis(yf.Portable, filepath)
+
+        # Verify results maintained
+        assert portable.results.res_a == 42
+        assert portable.results.res_b == 84
+        assert set(portable.completed_steps) == {"step_a", "step_b"}
+
+        # Check type
+        assert isinstance(portable, yf.Portable)
+
+    finally:
+        # Cleanup
+        if os.path.exists(filepath):
+            os.remove(filepath)
+
+
+def test_load_portable_shortform():
+    """Test saving and loading in explicit portable format."""
+    filepath = "test_analysis.pkl"
+    write_hidden_analysis(filepath)
+
+    try:
+        # Load as portable
+        portable = yf.load_portable(filepath)
+
+        # Verify results maintained
+        assert portable.results.res_a == 42
+        assert portable.results.res_b == 84
+        assert set(portable.completed_steps) == {"step_a", "step_b"}
+
+        # Check type
+        assert isinstance(portable, yf.Portable)
+
+    finally:
+        # Cleanup
+        if os.path.exists(filepath):
+            os.remove(filepath)
+
+
+def test_load_portable_explit():
+    """Test saving and loading in explicit portable format."""
+    filepath = "test_analysis.pkl"
+    write_hidden_analysis(filepath)
+
+    try:
+        # Load as portable
+        portable = yf.Portable.load(filepath)
 
         # Verify results maintained
         assert portable.results.res_a == 42

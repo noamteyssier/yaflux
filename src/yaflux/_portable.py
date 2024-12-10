@@ -68,3 +68,13 @@ class Portable(Base):
             completed_steps=analysis.completed_steps,
             step_metadata=metadata,
         )
+
+    @classmethod
+    def load(cls, filepath: str) -> "Portable":
+        """Load a portable analysis from a file.
+
+        Overrides the base class by explicitly loading as Portable.
+        """
+        from ._loaders import load_analysis
+
+        return load_analysis(Portable, filepath)

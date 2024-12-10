@@ -1,6 +1,6 @@
 # yaflux/_loaders.py
-from typing import Union, Type, TypeVar
 import pickle
+from typing import Type, TypeVar, Union
 
 from ._base import Base
 from ._portable import Portable
@@ -35,7 +35,7 @@ def load_portable(filepath: str) -> Portable:
     """
     Load analysis in portable format, regardless of original class availability.
     """
-    return Portable.load(filepath)
+    return load_analysis(Portable, filepath)
 
 
 def to_portable(analysis: Base) -> Portable:
