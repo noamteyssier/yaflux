@@ -111,6 +111,26 @@ metadata_report = analysis.metadata_report()
 print(metadata_report)
 ```
 
+### Visualizing an analysis
+
+This is included in the `yaflux[viz]` package and provides a simple way to visualize the structure of an analysis pipeline.
+The visualization is generated using the `graphviz` library and can be saved in various formats.
+It requires that `graphviz` cli tools are installed on your system.
+
+```python
+import yaflux as yf
+
+# Load analysis as a Python object
+analysis = MyAnalysis()
+
+# Visualize the analysis
+analysis.visualize_dependencies()
+
+# Save the visualization
+dot = analysis.visualize_dependencies()
+dot.render("analysis", format="png")
+```
+
 ## Design Philosophy
 
 `yaflux` was designed around several core principles:
@@ -141,6 +161,21 @@ print(metadata_report)
 
 ## Installation
 
+For a base python installation with zero external dependencies use:
+
 ```bash
 pip install yaflux
+```
+
+For a more feature-rich installation with additional dependencies use:
+
+```bash
+pip install yaflux[full]
+```
+
+Or if you want a specific subset of features, you can install individual extras:
+
+```bash
+# For visualization support
+pip install yaflux[viz]
 ```
