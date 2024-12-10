@@ -133,7 +133,8 @@ class Base:
 
 try:
     from ._viz import _check_graphviz, visualize_dependencies
+
     if _check_graphviz():
         Base.visualize_dependencies = visualize_dependencies
 except ImportError:
-    pass # Keep the stub method
+    pass  # Keep the stub method

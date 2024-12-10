@@ -4,7 +4,8 @@ import shutil
 def _check_graphviz():
     """Check if graphviz is available"""
     try:
-        import graphviz # noqa
+        import graphviz  # noqa
+
         return True
     except ImportError:
         return False
@@ -88,13 +89,13 @@ def visualize_dependencies(
 
     from graphviz import Digraph
 
-    dot = Digraph(comment='Analysis Dependencies')
+    dot = Digraph(comment="Analysis Dependencies")
     dot.attr(rankdir=rankdir)
 
     # Set some global attributes for nicer appearance
-    dot.attr('node', fontname=fontname)
-    dot.attr('edge', fontname=fontname)
-    dot.attr('graph', fontsize=str(fontsize))
+    dot.attr("node", fontname=fontname)
+    dot.attr("edge", fontname=fontname)
+    dot.attr("graph", fontsize=str(fontsize))
 
     # Track all nodes to avoid duplicates
     result_nodes = set()
@@ -111,22 +112,26 @@ def visualize_dependencies(
             shape="box",
             style="filled",
             fillcolor=step_fillcolor,
-            color=step_linecolor if is_complete else incomplete_linecolor
+            color=step_linecolor if is_complete else incomplete_linecolor,
         )
 
         # Add nodes for results this step creates
         for result in method.creates:
             if result not in result_nodes:
                 is_result_complete = hasattr(self.results, result)
-                color = complete_linecolor if is_result_complete else incomplete_linecolor
-                fillcolor = complete_fillcolor if is_result_complete else incomplete_fillcolor
+                color = (
+                    complete_linecolor if is_result_complete else incomplete_linecolor
+                )
+                fillcolor = (
+                    complete_fillcolor if is_result_complete else incomplete_fillcolor
+                )
                 dot.node(
                     result,
                     result,
                     style="filled,rounded",
                     shape="box",
                     fillcolor=fillcolor,
-                    color=color
+                    color=color,
                 )
                 result_nodes.add(result)
 
@@ -139,7 +144,7 @@ def visualize_dependencies(
                     style="filled,rounded",
                     shape="box",
                     fillcolor=incomplete_fillcolor,
-                    color=incomplete_linecolor
+                    color=incomplete_linecolor,
                 )
                 result_nodes.add(req)
 
@@ -148,7 +153,7 @@ def visualize_dependencies(
                 req,
                 f"step_{step_name}",
                 "",
-                color=complete_linecolor if is_complete else incomplete_linecolor
+                color=complete_linecolor if is_complete else incomplete_linecolor,
             )
 
         # Edges from step to its outputs
@@ -157,7 +162,7 @@ def visualize_dependencies(
                 f"step_{step_name}",
                 create,
                 "",
-                color=complete_linecolor if is_complete else incomplete_linecolor
+                color=complete_linecolor if is_complete else incomplete_linecolor,
             )
 
     return dot
