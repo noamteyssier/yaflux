@@ -1,11 +1,11 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath('../../src/'))
+sys.path.insert(0, os.path.abspath("../../src/"))
 
-project = 'yaflux'
-copyright = '2024, noam teyssier'
-author = 'noam teyssier'
+project = "yaflux"
+copyright = "2024, noam teyssier"
+author = "noam teyssier"
 
 # Extensions
 extensions = [
@@ -18,35 +18,35 @@ extensions = [
     "numpydoc",
 ]
 
-templates_path = ['_templates']
+templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # Configure MyST Parser
 myst_enable_extensions = [
-    'colon_fence',    # Enable ::: code blocks
-    'deflist',        # Enable definition lists
-    'dollarmath',     # Enable $ and $$ for math
-    'fieldlist',      # Enable field lists
-    'html_admonition', # Enable !!! note blocks
-    'html_image',     # Enable HTML image syntax
-    'replacements',   # Enable text replacements
-    'smartquotes',    # Enable smart quotes
-    'tasklist',      # Enable task lists
+    "colon_fence",  # Enable ::: code blocks
+    "deflist",  # Enable definition lists
+    "dollarmath",  # Enable $ and $$ for math
+    "fieldlist",  # Enable field lists
+    "html_admonition",  # Enable !!! note blocks
+    "html_image",  # Enable HTML image syntax
+    "replacements",  # Enable text replacements
+    "smartquotes",  # Enable smart quotes
+    "tasklist",  # Enable task lists
 ]
 
 # Configure Markdown specific settings
 source_suffix = {
-    '.rst': 'restructuredtext',
-    '.md': 'markdown',
+    ".rst": "restructuredtext",
+    ".md": "markdown",
 }
 
 
 # Set master doc as README.md instead of index.rst
-master_doc = 'README'
+master_doc = "README"
 
 # Theming
-html_theme = 'pydata_sphinx_theme'
-html_static_path = ['_static']
+html_theme = "pydata_sphinx_theme"
+html_static_path = ["_static"]
 
 # Napoleon settings
 napoleon_google_docstring = False
