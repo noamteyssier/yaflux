@@ -1,5 +1,6 @@
-import yaflux as yf
 from _utils import _assert_in_order, _assert_out_of_order
+
+import yaflux as yf
 
 
 class LinearAnalysis(yf.Base):
@@ -21,10 +22,12 @@ class LinearAnalysis(yf.Base):
 
     @yf.step(creates="res_b", requires="res_a")
     def lin_b(self) -> int:
+        _ = self.results.res_a
         return 42
 
     @yf.step(creates="res_c", requires="res_b")
     def lin_c(self) -> int:
+        _ = self.results.res_b
         return 42
 
 

@@ -15,6 +15,7 @@ class SomeAnalysis(yf.Base):
 
     @yf.step(creates="extra_data", requires="some_data")
     def step_c(self):
+        _ = self.results.some_data
         return 42
 
     @yf.step(creates="something_else")
