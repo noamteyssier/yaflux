@@ -4,6 +4,7 @@ from contextlib import contextmanager
 
 class ResultsLock:
     """Context manager for controlling results mutation."""
+
     _thread_local = threading.local()
 
     @classmethod
