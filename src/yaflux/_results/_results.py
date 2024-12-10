@@ -18,9 +18,8 @@ class Results:
     """
 
     def __init__(self):
-        with ResultsLock.allow_mutation():
-            self._data = {}
-            self._metadata = {}
+        self._data = {}
+        self._metadata = {}
 
     def __getitem__(self, name):
         return self._data[name]

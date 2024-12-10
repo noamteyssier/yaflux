@@ -31,7 +31,8 @@ class Base:
     """
 
     def __init__(self, parameters: Optional[Any] = None):
-        self._results = Results()
+        with ResultsLock.allow_mutation(): # Unlock during initialization
+            self._results = Results()
         self._completed_steps = set()
         self._step_ordering = []  # Hidden attribute to store the order of performed steps
         self.parameters = parameters
