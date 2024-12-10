@@ -165,7 +165,6 @@ def step(
     requires_list = _normalize_list(requires)
 
     def decorator(func: Callable[..., T]) -> Callable[..., T]:
-
         # Validate AST before wrapping the function
         validate_step_requirements(func, requires_list)
 

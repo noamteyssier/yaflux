@@ -13,12 +13,15 @@ class ResultsAttributeVisitor(ast.NodeVisitor):
     def visit_Attribute(self, node: ast.Attribute) -> None:
         """Visit attribute access nodes in the AST."""
         # Check for pattern: self.results.{attr}
-        if (isinstance(node.value, ast.Attribute) and
-            isinstance(node.value.value, ast.Name) and
-            node.value.value.id == 'self' and
-            node.value.attr == 'results'):
+        if (
+            isinstance(node.value, ast.Attribute)
+            and isinstance(node.value.value, ast.Name)
+            and node.value.value.id == "self"
+            and node.value.attr == "results"
+        ):
             self.accessed_attrs.add(node.attr)
         self.generic_visit(node)
+
 
 def get_function_node(func) -> ast.FunctionDef:
     """Extract the FunctionDef node from a function's source code."""
@@ -27,9 +30,9 @@ def get_function_node(func) -> ast.FunctionDef:
 
     # Find the first line that starts with 'def'
     for i, line in enumerate(source_lines):
-        if line.lstrip().startswith('def '):
+        if line.lstrip().startswith("def "):
             # Join from this line onwards
-            func_source = '\n'.join(source_lines[i:])
+            func_source = "\n".join(source_lines[i:])
             # Dedent the source code to remove any indentation
             func_source = textwrap.dedent(func_source)
             break
@@ -45,7 +48,10 @@ def get_function_node(func) -> ast.FunctionDef:
     except SyntaxError as e:
         raise ValueError(f"Could not parse function source: {e}")
 
-def validate_results_usage(func_node: ast.FunctionDef, requires: List[str]) -> List[str]:
+
+def validate_results_usage(
+    func_node: ast.FunctionDef, requires: List[str]
+) -> List[str]:
     """
     Validate that all self.results.{attr} accesses are declared in requires.
 
@@ -65,12 +71,10 @@ def validate_results_usage(func_node: ast.FunctionDef, requires: List[str]) -> L
     visitor.visit(func_node)
 
     # Compare against requires list
-    undeclared = [
-        attr for attr in visitor.accessed_attrs
-        if attr not in requires
-    ]
+    undeclared = [attr for attr in visitor.accessed_attrs if attr not in requires]
 
     return undeclared
+
 
 def validate_step_requirements(func, requires: list[str]) -> None:
     """
