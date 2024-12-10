@@ -15,149 +15,135 @@ A declarative framework for managing complex analytical workflows in Python.
 - **Serialization**: Simple persistence of complete analysis states
 - **Portable Results**: Analysis results can be shared and loaded without original class definitions
 
-## Example Usage
+## Example
 
-### Defining and running an analysis
+With `yaflux`, you can define complex analytical workflows in a structured and reproducible way.
+
+All methods are functional and the step decorator handles mutations to the analysis object.
+You can specify dependencies between steps and `yaflux` will automatically track them.
+This allows you to focus on the functional implementation of each step and limit side effects.
 
 ```python
 import yaflux as yf
 
 class MyAnalysis(yf.Base):
+    """An example analysis class."""
 
+    # Define analysis steps
+    @yf.step(creates="raw_data")
+    def workflow_step_a(self) -> list[int]:
+        return [i for i in range(10)]
+
+    # Specify dependencies between steps
     @yf.step(creates="processed_data", requires="raw_data")
-    def process_data(self) -> typing.Any:
-        # Process data here
-        return {"processed_data": processed_result}
+    def workflow_step_b(self) -> list[int]:
+        return [i * 2 for i in self.results.raw_data]
 
-# Run and save analysis
-analysis = MyAnalysis(parameters={...})
-analysis.process_data()
+    # Combine results from previous steps
+    @yf.step(creates="final_data", requires=["raw_data", "processed_data"])
+    def workflow_step_c(self) -> list[int]:
+        return [i + j for i in self.results.raw_data for j in self.results.processed_data]
 
-# Access results
-results = analysis.results.processed_data
+    # Define a complete workflow however you'd like
+    def run(self):
+        self.workflow_step_a()
+        self.workflow_step_b()
+        self.workflow_step_c()
 
-# Save analysis state
-analysis.save("analysis.pkl")
-```
-
-### Loading an analysis
-
-`yaflux` provides a simple way to load and access analysis results:
-
-```python
-import yaflux as yf
-
-# Load analysis as a Python object
-analysis = MyAnalysis.load("analysis.pkl")
-
-# Access results
-results = analysis.results.processed_data
-
-# View metadata
-print(analysis.available_steps)
-print(analysis.completed_steps)
-
-# Rerun analysis from a specific step
-analysis.process_data()
-```
-
-### Loading an analysis without original class definition
-
-`yaflux` provides support for sharing analysis results with collaborators who may not have access to your original analysis code.
-This is particularly useful when:
-
-- Sharing results with colleagues who don't need the full pipeline
-- Archiving analysis results for long-term storage
-- Making results available in environments where the original code cannot be installed
-
-```python
-import yaflux as yf
-
-# Load without original class definition
-portable = yf.load_portable("analysis.pkl")
-
-# Access results
-results = portable.results.processed_data
-
-# View metadata
-print(portable.available_steps)
-print(portable.completed_steps)
-```
-
-When loading portable results:
-
-- All results and metadata are preserved.
-- Step definitions are replaced with informative placeholders
-- Original class definition is not required
-
-### Exploring the metadata of an analysis
-
-`yaflux` stores runtime metadata about the analysis state to track step-level information.
-This lets you see how specific steps were run and collect runtime characteristics like timestamps and durations.
-
-```python
-import yaflux as yf
-
-# Load analysis as a Python object
-analysis = MyAnalysis(parameters=None)
-analysis.process_data()
-
-# View metadata (indexed by step name)
-step_metadata = analysis.get_step_metadata("process_data")
-print(step_metadata)
-
-# View a global report
-metadata_report = analysis.metadata_report()
-print(metadata_report)
-```
-
-### Visualizing an analysis
-
-This is included in the `yaflux[viz]` package and provides a simple way to visualize the structure of an analysis pipeline.
-The visualization is generated using the `graphviz` library and can be saved in various formats.
-It requires that `graphviz` cli tools are installed on your system.
-
-```python
-import yaflux as yf
-
-# Load analysis as a Python object
+# Define and run an analysis
 analysis = MyAnalysis()
+analysis.run()
 
-# Visualize the analysis
+# Access results
+final = analysis.results.final_data
+
+# Save and load analysis state
+analysis.save("analysis.pkl")
+
+# Load analysis state
+loaded = MyAnalysis.load("analysis.pkl")
+
+# Load analysis without original class definition
+loaded = yf.load_portable("analysis.pkl")
+
+# Skip redudant steps
+analysis.workflow_step_a() # skipped
+
+# Force re-run of a step
+analysis.workflow_step_a(force=True) # re-run
+
+# Visualize the analysis (using graphviz)
 analysis.visualize_dependencies()
 
-# Save the visualization
-dot = analysis.visualize_dependencies()
-dot.render("analysis", format="png")
+# See how an analysis step was run and its metadata
+metadata = analysis.get_step_metadata("workflow_step_b")
 ```
 
-## Design Philosophy
+## Visualizing Complex Workflows
 
-`yaflux` was designed around several core principles:
+`yaflux` provides a built-in method for visualizing the dependencies between analysis steps.
+This can be useful for understanding complex workflows and ensuring that all dependencies are correctly specified.
 
-1. **Python-Native**: Built to integrate seamlessly with existing Python analysis workflows
-2. **Explicit Dependencies**: Clear declaration of inputs and outputs for each analysis step
-3. **State Protection**: Immutable results storage to ensure reproducibility
-4. **Minimal Infrastructure**: No external dependencies or services required
-5. **Portability**: Complete analyses can be serialized and shared
+Let's first define a complex analysis with multiple steps and dependencies:
 
-## Use Cases
+```python
+import yaflux as yf
 
-`yaflux` is particularly well-suited for:
 
-- Complex data analysis pipelines requiring clear provenance
-- Scientific computing workflows where reproducibility is critical
-- Collaborative research projects requiring shared analysis states
-- Multi-step data transformations needing explicit dependency management
+class MyAnalysis(yf.Base):
 
-## Implementation
+    @yf.step(creates=["x", "y", "z"])
+    def load_data(self) -> tuple[int, int, int]:
+        return 1, 2, 3
 
-`yaflux` uses Python's type system and decorators to create a lightweight framework that enforces:
+    @yf.step(creates="proc_x", requires="x")
+    def process_x(self) -> int:
+        return self.results.x + 1
 
-- Clear specification of dependencies between analysis steps
-- Protected storage of intermediate and final results
-- Reproducible execution of analysis pipelines
-- Comprehensive tracking of analysis state
+    @yf.step(creates=["proc_y1", "proc_y2"], requires="y")
+    def process_y(self) -> tuple[int, int]:
+        return (
+            self.results.y + 1,
+            self.results.y + 2,
+        )
+
+    @yf.step(creates="proc_z", requires=["proc_y1", "proc_y2", "z"])
+    def process_z(self) -> int:
+        return self.results.proc_y1 + self.results.proc_y2 + self.results.z
+
+    @yf.step(creates="final", requires=["proc_x", "proc_z"])
+    def final(self) -> int:
+        return self.results.proc_x + self.results.proc_z
+
+    def run(self):
+        self.load_data()
+        self.process_x()
+        self.process_y()
+        self.process_z()
+        self.final()
+```
+
+Now we can visualize the dependencies between the analysis steps:
+
+```python
+analysis = MyAnalysis()
+analysis.visualize_dependencies()
+```
+
+![Dependency Graph](docs/source/assets/complex_workflow_init.svg)
+
+As we run the analysis, we can fill in the dependency graph and see where we are in the workflow.
+
+```python
+analysis.load_data()
+analysis.process_x()
+analysis.process_y()
+
+# Visualize the updated dependencies
+analysis.visualize_dependencies()
+```
+
+![Dependency Graph](docs/source/assets/complex_workflow_progress.svg)
 
 ## Installation
 
@@ -176,6 +162,5 @@ pip install yaflux[full]
 Or if you want a specific subset of features, you can install individual extras:
 
 ```bash
-# For visualization support
 pip install yaflux[viz]
 ```

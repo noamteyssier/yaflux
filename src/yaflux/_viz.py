@@ -51,31 +51,31 @@ def visualize_dependencies(
     graphviz.Digraph
         The rendered graph object
 
-    Usage:
-        import yaflux as yf
-
-        class MyAnalysis(yf.Base):
-            @yf.step(creates="a")
-            def step_a(self):
-                return 42
-
-            @yf.step(creates="b", requires="a")
-            def step_b(self):
-                return 42
-
-            @yf.step(creates="c", requires=["a", "b"])
-            def step_c(self):
-                return 42
-
-        analysis = MyAnalysis()
-
-        # Visualize the dependencies
-        analysis.visualize_dependencies()
-
-        # Save the visualization to a file
-        dot = analysis.visualize_dependencies()
-        dot.render('dependencies.pdf')
-
+    Examples
+    --------
+    >>> import yaflux as yf
+    >>>
+    >>> class MyAnalysis(yf.Base):
+    >>>     @yf.step(creates="a")
+    >>>     def step_a(self):
+    >>>         return 42
+    >>>
+    >>>     @yf.step(creates="b", requires="a")
+    >>>     def step_b(self):
+    >>>         return 42
+    >>>
+    >>>     @yf.step(creates="c", requires=["a", "b"])
+    >>>     def step_c(self):
+    >>>         return 42
+    >>>
+    >>> analysis = MyAnalysis()
+    >>>
+    >>> # Visualize the dependencies
+    >>> analysis.visualize_dependencies()
+    >>>
+    >>> # Save the visualization to a file
+    >>> dot = analysis.visualize_dependencies()
+    >>> dot.render('dependencies.pdf')
     """
     if not _check_graphviz():
         raise ImportError(
