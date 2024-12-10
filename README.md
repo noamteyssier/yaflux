@@ -152,7 +152,7 @@ One of the benefits of a declarative workflow is you can avoid a whole class of 
 In `yaflux` you can specify dependencies between steps using the `requires` argument in the `@step` decorator.
 The `step` function parses the decorated method's abstract syntax tree (AST) to determine the dependencies and ensure they are met.
 
-This means that if you try to access a result that hasn't been created yet, `yaflux` will raise an error at initialization time rather than at runtime.
+This means that if you try to access a result that hasn't been created yet, `yaflux` will raise an error at definition time rather than at runtime.
 
 The below code will raise an error at class definition time because `step_b` **uses** `z` but does not **require** it:
 
@@ -185,8 +185,6 @@ class BadAnalysis(yf.Base):
     @yf.step(creates="y", requires="some_complex_name") # Typo in `requires`
     def step_b(self) -> int:
         return self.results.some_complx_name + 1
-
-
 ```
 
 ## Installation
