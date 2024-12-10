@@ -42,7 +42,7 @@ source_suffix = {
 
 
 # Set master doc as README.md instead of index.rst
-master_doc = "README"
+master_doc = "index"
 
 # Theming
 html_theme = "pydata_sphinx_theme"
@@ -61,5 +61,3 @@ napoleon_use_ivar = False
 napoleon_use_param = True
 napoleon_use_rtype = True
 napoleon_type_aliases = None
-
-# Add yaflux to path
