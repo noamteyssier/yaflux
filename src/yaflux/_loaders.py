@@ -2,6 +2,8 @@
 import pickle
 from typing import Type, TypeVar, Union
 
+from yaflux._results._lock import ResultsLock
+
 from ._base import Base
 from ._portable import Portable
 
@@ -24,11 +26,12 @@ def load_analysis(cls: Type[T], filepath: str) -> Union[T, Portable]:
     """
     Load analysis, attempting original class first, falling back to portable.
     """
-    with open(filepath, "rb") as f:
-        try:
-            return pickle.load(f)
-        except (AttributeError, ImportError):
-            return PortableUnpickler(f).load()
+    with ResultsLock.allow_mutation():
+        with open(filepath, "rb") as f:
+            try:
+                return pickle.load(f)
+            except (AttributeError, ImportError):
+                return PortableUnpickler(f).load()
 
 
 def load_portable(filepath: str) -> Portable:
@@ -40,4 +43,5 @@ def load_portable(filepath: str) -> Portable:
 
 def to_portable(analysis: Base) -> Portable:
     """Convert an analysis to a portable version."""
-    return Portable.from_analysis(analysis)
+    with ResultsLock.allow_mutation():
+        return Portable.from_analysis(analysis)

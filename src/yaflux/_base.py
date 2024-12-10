@@ -2,6 +2,8 @@ import os
 import pickle
 from typing import Any, Optional
 
+from yaflux._results._lock import ResultsLock
+
 from ._metadata import Metadata
 from ._results import Results
 
@@ -104,6 +106,7 @@ class Base:
     @classmethod
     def load(cls, filepath: str):
         """Load an `Analysis` object from a file using pickle."""
-        with open(filepath, "rb") as file:
-            analysis = pickle.load(file)
+        with ResultsLock.allow_mutation():
+            with open(filepath, "rb") as file:
+                analysis = pickle.load(file)
         return analysis
