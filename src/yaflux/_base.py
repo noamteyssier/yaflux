@@ -111,3 +111,30 @@ class Base:
             with open(filepath, "rb") as file:
                 analysis = pickle.load(file)
         return analysis
+
+    def visualize_dependencies(self, *args, **kwargs):
+        """Create a visualization of step dependencies.
+
+        This is a stub that will be replaced with the actual visualization
+        if graphviz is installed. Install with:
+
+        ```bash
+        pip install yaflux[viz]
+        ```
+
+        Raises:
+            ImportError: If graphviz is not installed.
+        """
+        raise ImportError(
+            "graphviz package is required for visualization. "
+            "Install with: pip install yaflux[viz]"
+        )
+
+
+try:
+    from ._viz import _check_graphviz, visualize_dependencies
+
+    if _check_graphviz():
+        Base.visualize_dependencies = visualize_dependencies
+except ImportError:
+    pass  # Keep the stub method

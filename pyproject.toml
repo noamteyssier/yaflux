@@ -1,12 +1,16 @@
 [project]
 name = "yaflux"
-version = "0.1.7"
+version = "0.1.8"
 description = "A lightweight, declarative framework for python analysis workflows."
 readme = "README.md"
 authors = [
     { name = "noam teyssier", email = "22600644+noamteyssier@users.noreply.github.com" },
 ]
 dependencies = []
+
+[project.optional-dependencies]
+viz = ["graphviz>=0.20.3"]
+full = ["yaflux[viz]"]
 
 [build-system]
 requires = ["hatchling"]
