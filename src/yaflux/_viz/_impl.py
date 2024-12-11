@@ -81,9 +81,15 @@ def visualize_dependencies(self, **kwargs):
 
     result_nodes: Set[str] = set()
 
+    # Get all available steps including inherited ones
+    available_steps = {}
+    for cls in self.__class__.__mro__:
+        for name, method in vars(cls).items():
+            if hasattr(method, "creates") and name not in available_steps:
+                available_steps[name] = method
+
     # Add all nodes and edges
-    for step_name in self.available_steps:
-        method = getattr(self.__class__, step_name)
+    for step_name, method in available_steps.items():
         is_step_complete = step_name in self.completed_steps
 
         # Add step node
@@ -124,7 +130,8 @@ def visualize_dependencies(self, **kwargs):
         # Add requirement edges
         for req in method.requires:
             if req not in result_nodes:
-                add_node(dot, req, "result", False, config)
+                is_req_complete = hasattr(self.results, req)
+                add_node(dot, req, "result", is_req_complete, config)
                 result_nodes.add(req)
             add_edge(
                 dot,
@@ -139,7 +146,8 @@ def visualize_dependencies(self, **kwargs):
         # Add flag requirement edges
         for flag in method.requires_flags:
             if flag not in result_nodes:
-                add_node(dot, flag, "flag", False, config)
+                is_flag_complete = hasattr(self.results, flag)
+                add_node(dot, flag, "flag", is_flag_complete, config)
                 result_nodes.add(flag)
             add_edge(
                 dot,

@@ -23,6 +23,7 @@ A declarative framework for managing complex analytical workflows in Python.
 installation
 quick_start
 design
+advanced_usage
 ```
 
 ## API

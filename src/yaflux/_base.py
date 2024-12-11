@@ -45,11 +45,12 @@ class Base:
     @property
     def available_steps(self) -> list[str]:
         """List all available steps for the analysis."""
-        return [
-            name
-            for name, method in self.__class__.__dict__.items()
-            if hasattr(method, "creates")
-        ]
+        steps = []
+        for cls in self.__class__.__mro__:
+            for name, method in vars(cls).items():
+                if hasattr(method, "creates") and name not in steps:
+                    steps.append(name)
+        return steps
 
     @property
     def completed_steps(self) -> list[str]:
