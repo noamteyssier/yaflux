@@ -16,7 +16,7 @@ def add_node(
     colors = getattr(config, f"{node_type}_colors")
 
     dot.node(
-        node_id,
+        f"{node_type}_{node_id}",
         f"{style.prefix}{node_id}" if style.prefix else node_id,
         shape=style.shape,
         style=style.style,
@@ -31,11 +31,13 @@ def add_edge(
     to_node: str,
     color_set: dict[str, str],
     is_complete: bool,
+    from_node_type: Literal["step", "result", "flag"],
+    to_node_type: Literal["step", "result", "flag"],
 ) -> None:
     """Add an edge to the graph with appropriate styling"""
     dot.edge(
-        from_node,
-        to_node,
+        f"{from_node_type}_{from_node}",
+        f"{to_node_type}_{to_node}",
         "",
         color=color_set["complete_line"]
         if is_complete
@@ -91,7 +93,7 @@ def visualize_dependencies(self, **kwargs):
                 is_result_complete = hasattr(self.results, result)
                 add_node(dot, result, "result", is_result_complete, config)
                 result_nodes.add(result)
-            add_edge(dot, step_name, result, config.step_colors, is_step_complete)
+            add_edge(dot, step_name, result, config.step_colors, is_step_complete, "step", "result")
 
         # Add flag nodes and edges
         for flag in method.creates_flags:
@@ -99,20 +101,20 @@ def visualize_dependencies(self, **kwargs):
                 is_flag_complete = hasattr(self.results, flag)
                 add_node(dot, flag, "flag", is_flag_complete, config)
                 result_nodes.add(flag)
-            add_edge(dot, step_name, flag, config.step_colors, is_step_complete)
+            add_edge(dot, step_name, flag, config.step_colors, is_step_complete, "step", "flag")
 
         # Add requirement edges
         for req in method.requires:
             if req not in result_nodes:
                 add_node(dot, req, "result", False, config)
                 result_nodes.add(req)
-            add_edge(dot, req, step_name, config.result_colors, is_step_complete)
+            add_edge(dot, req, step_name, config.result_colors, is_step_complete, "result", "step")
 
         # Add flag requirement edges
         for flag in method.requires_flags:
             if flag not in result_nodes:
                 add_node(dot, flag, "flag", False, config)
                 result_nodes.add(flag)
-            add_edge(dot, flag, step_name, config.flag_colors, is_step_complete)
+            add_edge(dot, flag, step_name, config.flag_colors, is_step_complete, "flag", "step")
 
     return dot
