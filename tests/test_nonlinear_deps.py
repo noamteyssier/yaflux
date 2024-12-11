@@ -1,5 +1,6 @@
-import yaflux as yf
 from _utils import _assert_in_order, _assert_out_of_order
+
+import yaflux as yf
 
 
 class DirectedAnalysis(yf.Base):
@@ -28,26 +29,33 @@ class DirectedAnalysis(yf.Base):
 
     @yf.step(creates="res_b1", requires="res_a1")
     def dag_b1(self) -> int:
+        _ = self.results.res_a1
         return 42
 
     @yf.step(creates="res_c1", requires="res_b1")
     def dag_c1(self) -> int:
+        _ = self.results.res_b1
         return 42
 
     @yf.step(creates="res_b2", requires="res_a1")
     def dag_b2(self) -> int:
+        _ = self.results.res_a1
         return 42
 
     @yf.step(creates="res_c2", requires="res_b2")
     def dag_c2(self) -> int:
+        _ = self.results.res_b2
         return 42
 
     @yf.step(creates="res_c3", requires="res_b2")
     def dag_c3(self) -> int:
+        _ = self.results.res_b2
         return 42
 
     @yf.step(creates="res_d1", requires=["res_c2", "res_c3"])
     def dag_d1(self) -> int:
+        _ = self.results.res_c2
+        _ = self.results.res_c3
         return 42
 
 

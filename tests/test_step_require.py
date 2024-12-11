@@ -12,14 +12,18 @@ class RequireTesting(yf.Base):
 
     @yf.step(requires="dep_a")
     def requires_as_str(self):
+        _ = self.results.dep_a
         pass
 
     @yf.step(requires=["dep_a"])
     def requires_as_list_singular(self):
+        _ = self.results.dep_a
         pass
 
     @yf.step(requires=["dep_a", "dep_b"])
     def requires_as_list_multiple(self):
+        _ = self.results.dep_a
+        _ = self.results.dep_b
         pass
 
 
