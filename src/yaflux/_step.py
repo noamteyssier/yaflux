@@ -184,6 +184,17 @@ def step(
         Names of the results this step creates
     requires : str | list[str] | None
         Names of the results this step requires
+
+    Attributes
+    ----------
+    creates : list[str]
+        Names of the results this step creates
+    requires : list[str]
+        Names of the results this step requires
+    creates_flags : list[str]
+        Names of the flags this step creates
+    requires_flags : list[str]
+        Names of the flags this step requires
     """
     creates_list = _normalize_list(creates)
     requires_list = _normalize_list(requires)
@@ -260,6 +271,8 @@ def step(
         # Store metadata
         wrapper.creates = creates_list  # type: ignore
         wrapper.requires = requires_list  # type: ignore
+        wrapper.creates_flags = creates_flags  # type: ignore
+        wrapper.requires_flags = requires_flags  # type: ignore
         return wrapper
 
     return decorator

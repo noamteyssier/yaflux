@@ -1,6 +1,6 @@
 [project]
 name = "yaflux"
-version = "0.1.12"
+version = "0.1.13"
 description = "A lightweight, declarative framework for python analysis workflows."
 readme = "README.md"
 authors = [
