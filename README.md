@@ -15,6 +15,10 @@ A declarative framework for managing complex analytical workflows in Python.
 - **Serialization**: Simple persistence of complete analysis states
 - **Portable Results**: Analysis results can be shared and loaded without original class definitions
 
+## Documentation
+
+The full documentation for `yaflux` can be found at [yaflux.readthedocs.io](https://yaflux.readthedocs.io).
+
 ## Example
 
 With `yaflux`, you can define complex analytical workflows in a structured and reproducible way.
