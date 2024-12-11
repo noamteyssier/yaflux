@@ -3,6 +3,7 @@ class UnauthorizedMutationError(Exception):
 
     pass
 
+
 class FlagError(Exception):
     """Raised when attempting to modify a flag that has already been set."""
 

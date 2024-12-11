@@ -138,6 +138,7 @@ def test_create_return_superset_dict():
     except ValueError as exc:
         assert "superset of creates list" in str(exc)
 
+
 def test_create_with_interspersed_flags():
     analysis = CreateTesting()
     analysis.creates_with_interspersed_flags()

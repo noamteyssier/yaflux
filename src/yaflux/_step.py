@@ -10,6 +10,7 @@ from yaflux._results._lock import ResultsLock
 
 T = TypeVar("T")
 
+
 def _pull_flags(arglist: list[str]) -> tuple[list[str], list[str]]:
     args = []
     flags = []
@@ -19,6 +20,7 @@ def _pull_flags(arglist: list[str]) -> tuple[list[str], list[str]]:
         else:
             args.append(arg)
     return args, flags
+
 
 def _normalize_list(value: Optional[Union[list[str], str]]) -> list[str]:
     """Convert string or list input to normalized list."""
@@ -42,13 +44,12 @@ def _check_requirements(analysis: Base, requires: list[str]) -> None:
             f"Missing required results: {missing}. Run required steps first."
         )
 
+
 def _check_required_flags(analysis: Base, requires: list[str]) -> None:
     """Validate that all required flags exist."""
     missing = [req for req in requires if not hasattr(analysis._results, req)]
     if missing:
-        raise ValueError(
-            f"Missing required flag: {missing}. Run required steps first."
-        )
+        raise ValueError(f"Missing required flag: {missing}. Run required steps first.")
 
 
 def _handle_existing_attributes(
@@ -148,6 +149,7 @@ def _store_results(
     # Base base where the result is a single value
     elif result is not None and len(creates) == 1:
         _store_singular_result(analysis, creates, result)
+
 
 def _set_flags(analysis: Base, flags: list[str]) -> None:
     """Set the flags on the analysis object."""

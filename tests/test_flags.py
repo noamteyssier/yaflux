@@ -1,9 +1,7 @@
-
 import yaflux as yf
 
 
 class Analysis(yf.Base):
-
     @yf.step(creates="a")
     def setup(self):
         return [1, 2, 3]
@@ -20,6 +18,7 @@ class Analysis(yf.Base):
     def redundant_flag_setup(self):
         return [1, 2, 3]
 
+
 def test_flag_usage():
     analysis = Analysis()
     analysis.setup()
@@ -27,6 +26,7 @@ def test_flag_usage():
     analysis.use_mut()
 
     assert analysis.results.a == [42, 2, 3]
+
 
 def test_flag_usage_out_of_order():
     analysis = Analysis()
