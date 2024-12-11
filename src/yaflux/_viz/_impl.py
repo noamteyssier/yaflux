@@ -93,7 +93,15 @@ def visualize_dependencies(self, **kwargs):
                 is_result_complete = hasattr(self.results, result)
                 add_node(dot, result, "result", is_result_complete, config)
                 result_nodes.add(result)
-            add_edge(dot, step_name, result, config.step_colors, is_step_complete, "step", "result")
+            add_edge(
+                dot,
+                step_name,
+                result,
+                config.step_colors,
+                is_step_complete,
+                "step",
+                "result",
+            )
 
         # Add flag nodes and edges
         for flag in method.creates_flags:
@@ -101,20 +109,44 @@ def visualize_dependencies(self, **kwargs):
                 is_flag_complete = hasattr(self.results, flag)
                 add_node(dot, flag, "flag", is_flag_complete, config)
                 result_nodes.add(flag)
-            add_edge(dot, step_name, flag, config.step_colors, is_step_complete, "step", "flag")
+            add_edge(
+                dot,
+                step_name,
+                flag,
+                config.step_colors,
+                is_step_complete,
+                "step",
+                "flag",
+            )
 
         # Add requirement edges
         for req in method.requires:
             if req not in result_nodes:
                 add_node(dot, req, "result", False, config)
                 result_nodes.add(req)
-            add_edge(dot, req, step_name, config.result_colors, is_step_complete, "result", "step")
+            add_edge(
+                dot,
+                req,
+                step_name,
+                config.result_colors,
+                is_step_complete,
+                "result",
+                "step",
+            )
 
         # Add flag requirement edges
         for flag in method.requires_flags:
             if flag not in result_nodes:
                 add_node(dot, flag, "flag", False, config)
                 result_nodes.add(flag)
-            add_edge(dot, flag, step_name, config.flag_colors, is_step_complete, "flag", "step")
+            add_edge(
+                dot,
+                flag,
+                step_name,
+                config.flag_colors,
+                is_step_complete,
+                "flag",
+                "step",
+            )
 
     return dot
