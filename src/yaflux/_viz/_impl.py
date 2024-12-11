@@ -1,6 +1,6 @@
 from typing import Literal, Set
 
-from ._check import _check_graphviz
+from ._check import _check_dot_exists, _check_graphviz
 from ._style import GraphConfig
 
 
@@ -58,17 +58,19 @@ def visualize_dependencies(self, **kwargs):
     graphviz.Digraph
         The rendered graph object
     """
-    _check_graphviz()
-    config = GraphConfig(**kwargs)
-
-    try:
-        from graphviz import Digraph
-    except ImportError:
+    if not _check_graphviz():
         raise ImportError(
             "Graphviz is required for this method.\n"
             "Install with `pip install yaflux[viz]`"
         )
+    else:
+        from graphviz import Digraph
+    _check_dot_exists()
 
+    # Get configuration options
+    config = GraphConfig(**kwargs)
+
+    # Create the graph object
     dot = Digraph(comment="Analysis Dependencies")
 
     # Set global attributes
