@@ -64,6 +64,10 @@ class CreateTesting(yf.Base):
             "c": 42,
         }
 
+    @yf.step(creates=["a", "b", "_flag", "c"])
+    def creates_with_interspersed_flags(self) -> tuple[int, int, int]:
+        return (42, 42, 42)
+
 
 def test_create_null():
     analysis = CreateTesting(parameters=None)
@@ -133,3 +137,10 @@ def test_create_return_superset_dict():
         assert False
     except ValueError as exc:
         assert "superset of creates list" in str(exc)
+
+def test_create_with_interspersed_flags():
+    analysis = CreateTesting()
+    analysis.creates_with_interspersed_flags()
+    assert analysis.results.a == 42
+    assert analysis.results.b == 42
+    assert analysis.results.c == 42
