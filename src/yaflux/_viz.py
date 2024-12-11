@@ -11,17 +11,28 @@ def _check_graphviz():
         return False
 
 
+def build_color_set(hex: str) -> tuple[str, str, str, str]:
+    """Builds the color set given a base color"""
+    complete_linecolor = f"{hex}FF"
+    complete_fillcolor = f"{hex}80"  # 50% opacity
+    incomplete_linecolor = f"{hex}10"  # 50% opacity
+    incomplete_fillcolor = f"{hex}10"  # 10% opacity
+    return (
+        complete_linecolor,
+        complete_fillcolor,
+        incomplete_linecolor,
+        incomplete_fillcolor,
+    )
+
+
 def visualize_dependencies(
     self,
     fontname: str = "Helvetica",
     fontsize: int = 11,
     rankdir: str = "LR",
-    complete_linecolor: str = "darkgreen",
-    complete_fillcolor: str = "palegreen",
-    incomplete_linecolor: str = "gray70",
-    incomplete_fillcolor: str = "white",
-    step_linecolor: str = "navy",
-    step_fillcolor: str = "lightblue",
+    step_color: str = "#008000",  # darkgreen
+    result_color: str = "#000080",  # darkblue
+    flag_color: str = "#800000",  # darkred
 ):
     """Create a clear visualization of step dependencies using Graphviz.
 
@@ -87,6 +98,26 @@ def visualize_dependencies(
     if not shutil.which("dot"):
         raise FileNotFoundError("Graphviz executables not found in PATH")
 
+    # Build color sets
+    (
+        step_complete_linecolor,
+        step_complete_fillcolor,
+        step_incomplete_linecolor,
+        step_incomplete_fillcolor,
+    ) = build_color_set(step_color)
+    (
+        result_complete_linecolor,
+        result_complete_fillcolor,
+        result_incomplete_linecolor,
+        result_incomplete_fillcolor,
+    ) = build_color_set(result_color)
+    (
+        flag_complete_linecolor,
+        flag_complete_fillcolor,
+        flag_incomplete_linecolor,
+        flag_incomplete_fillcolor,
+    ) = build_color_set(flag_color)
+
     from graphviz import Digraph
 
     dot = Digraph(comment="Analysis Dependencies")
@@ -111,8 +142,10 @@ def visualize_dependencies(
             step_name,
             shape="box",
             style="filled",
-            fillcolor=step_fillcolor,
-            color=step_linecolor if is_complete else incomplete_linecolor,
+            fillcolor=step_complete_fillcolor
+            if is_complete
+            else step_incomplete_fillcolor,
+            color=step_complete_linecolor if is_complete else step_incomplete_linecolor,
         )
 
         # Add nodes for results this step creates
@@ -120,10 +153,14 @@ def visualize_dependencies(
             if result not in result_nodes:
                 is_result_complete = hasattr(self.results, result)
                 color = (
-                    complete_linecolor if is_result_complete else incomplete_linecolor
+                    result_complete_linecolor
+                    if is_result_complete
+                    else result_incomplete_linecolor
                 )
                 fillcolor = (
-                    complete_fillcolor if is_result_complete else incomplete_fillcolor
+                    result_complete_fillcolor
+                    if is_result_complete
+                    else result_incomplete_fillcolor
                 )
                 dot.node(
                     result,
@@ -135,7 +172,31 @@ def visualize_dependencies(
                 )
                 result_nodes.add(result)
 
-        # Add edges from requirements to step and step to creates
+        # Add nodes for flags this step creates
+        for flag in method.creates_flags:
+            if flag not in result_nodes:
+                is_flag_complete = hasattr(self.results, flag)
+                color = (
+                    flag_complete_linecolor
+                    if is_flag_complete
+                    else flag_incomplete_linecolor
+                )
+                fillcolor = (
+                    flag_complete_fillcolor
+                    if is_flag_complete
+                    else flag_incomplete_fillcolor
+                )
+                dot.node(
+                    flag,
+                    f"flag{flag}",
+                    style="filled",
+                    shape="cds",
+                    fillcolor=fillcolor,
+                    color=color,
+                )
+                result_nodes.add(flag)
+
+        # Add edges from requirements to step
         for req in method.requires:
             if req not in result_nodes:
                 dot.node(
@@ -143,8 +204,8 @@ def visualize_dependencies(
                     req,
                     style="filled,rounded",
                     shape="box",
-                    fillcolor=incomplete_fillcolor,
-                    color=incomplete_linecolor,
+                    fillcolor=result_incomplete_fillcolor,
+                    color=result_incomplete_linecolor,
                 )
                 result_nodes.add(req)
 
@@ -153,7 +214,32 @@ def visualize_dependencies(
                 req,
                 f"step_{step_name}",
                 "",
-                color=complete_linecolor if is_complete else incomplete_linecolor,
+                color=result_complete_linecolor
+                if is_complete
+                else result_incomplete_linecolor,
+            )
+
+        # Add edges from required flags to step
+        for flag in method.requires_flags:
+            if flag not in result_nodes:
+                dot.node(
+                    flag,
+                    flag,
+                    style="filled,rounded",
+                    shape="box",
+                    fillcolor=flag_incomplete_fillcolor,
+                    color=flag_incomplete_linecolor,
+                )
+                result_nodes.add(flag)
+
+            # Edge from required flag to step
+            dot.edge(
+                flag,
+                f"step_{step_name}",
+                "",
+                color=flag_complete_linecolor
+                if is_complete
+                else flag_incomplete_linecolor,
             )
 
         # Edges from step to its outputs
@@ -162,7 +248,20 @@ def visualize_dependencies(
                 f"step_{step_name}",
                 create,
                 "",
-                color=complete_linecolor if is_complete else incomplete_linecolor,
+                color=step_complete_linecolor
+                if is_complete
+                else step_incomplete_linecolor,
+            )
+
+        # Edges from step to its flags
+        for flag in method.creates_flags:
+            dot.edge(
+                f"step_{step_name}",
+                flag,
+                "",
+                color=step_complete_linecolor
+                if is_complete
+                else step_incomplete_linecolor,
             )
 
     return dot
