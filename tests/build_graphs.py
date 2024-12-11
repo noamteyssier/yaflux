@@ -1,7 +1,5 @@
 if __name__ == "__main__":
-
     import yaflux as yf
-
 
     class MyAnalysis(yf.Base):
         @yf.step(creates=["x", "y", "z"])
@@ -26,7 +24,6 @@ if __name__ == "__main__":
         @yf.step(creates="final", requires=["proc_x", "proc_z", "_marked"])
         def final(self) -> int:
             return self.results.proc_x + self.results.proc_z
-
 
     analysis = MyAnalysis()
     analysis.visualize_dependencies().render(
