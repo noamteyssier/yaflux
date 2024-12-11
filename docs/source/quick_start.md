@@ -76,6 +76,69 @@ Note that in the above example **no step mutates the analysis object**.
 The `step` decorator ensures that the results of each step are properly stored and tracked by the analysis object.
 This is an attempt to limit the potential for side effects and to make the analysis more reproducible.
 
+#### Flag Setting
+
+Sometimes theres no getting around mutating the internal state of the analysis object.
+This might be because an operation may be significantly more efficient if it can be done in place.
+However, you might still need to signify that a step has been run.
+In this case you can use the flag syntax in the `creates` or `requires` arguments to signify that a step has been run.
+
+Flags are set and required with a leading underscore.
+
+```python
+import yaflux as yf
+
+class MyAnalysis(yf.Base):
+
+    @yf.step(creates="raw_data")
+    def workflow_step_a(self) -> list[int]:
+        return [i for i in range(10)]
+
+    # Flag setting is specified with a leading underscore
+    @yf.step(creates="_mut_data", requires="raw_data")
+    def workflow_step_b(self) -> list[int]:
+        for idx in range(len(self.results.raw_data)):
+            if idx % 2 == 0:
+                self.results.raw_data[idx] = 100 # mutate the raw_data
+
+    # Flag requirements are specified with a leading underscore
+    @yf.step(creates="final_data", requires=["raw_data", "_mut_data"])
+    def workflow_step_c(self) -> list[int]:
+        return [i * 2 for i in self.results.raw_data]
+
+analysis = MyAnalysis()
+analysis.workflow_step_a()
+analysis.workflow_step_b()
+analysis.workflow_step_c()
+```
+
+Note that the results are not **reassigned** but **mutated** in place.
+`yaflux` will still not allow you to reassign the results of a step, but it will allow you to mutate them in place.
+
+```python
+import yaflux as yf
+
+class MyAnalysis(yf.Base):
+
+    @yf.step(creates="raw_data")
+    def workflow_step_a(self) -> list[int]:
+        return [i for i in range(10)]
+
+    # Flag setting is specified with a leading underscore
+    @yf.step(creates="_mut_data", requires="raw_data")
+    def workflow_step_b(self) -> list[int]:
+        self.results.raw_data = [i * 2 for i in self.results.raw_data] # will fail
+
+    # Flag requirements are specified with a leading underscore
+    @yf.step(creates="final_data", requires=["raw_data", "_mut_data"])
+    def workflow_step_c(self) -> list[int]:
+        return [i * 2 for i in self.results.raw_data]
+
+analysis = MyAnalysis()
+analysis.workflow_step_a()
+analysis.workflow_step_b() # will fail
+```
+
 ## Executing an Analysis
 
 The benefit of using `yaflux` is that it automatically:
