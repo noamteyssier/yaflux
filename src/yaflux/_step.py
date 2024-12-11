@@ -11,6 +11,17 @@ from yaflux._results._lock import ResultsLock
 T = TypeVar("T")
 
 
+def _pull_flags(arglist: list[str]) -> tuple[list[str], list[str]]:
+    args = []
+    flags = []
+    for arg in arglist:
+        if arg.startswith("_"):
+            flags.append(arg)
+        else:
+            args.append(arg)
+    return args, flags
+
+
 def _normalize_list(value: Optional[Union[list[str], str]]) -> list[str]:
     """Convert string or list input to normalized list."""
     if isinstance(value, str):
@@ -32,6 +43,13 @@ def _check_requirements(analysis: Base, requires: list[str]) -> None:
         raise ValueError(
             f"Missing required results: {missing}. Run required steps first."
         )
+
+
+def _check_required_flags(analysis: Base, requires: list[str]) -> None:
+    """Validate that all required flags exist."""
+    missing = [req for req in requires if not hasattr(analysis._results, req)]
+    if missing:
+        raise ValueError(f"Missing required flag: {missing}. Run required steps first.")
 
 
 def _handle_existing_attributes(
@@ -133,6 +151,12 @@ def _store_results(
         _store_singular_result(analysis, creates, result)
 
 
+def _set_flags(analysis: Base, flags: list[str]) -> None:
+    """Set the flags on the analysis object."""
+    for flag in flags:
+        setattr(analysis._results, flag, True)
+
+
 def _store_metadata(
     analysis: Base,
     step_name: str,
@@ -164,6 +188,9 @@ def step(
     creates_list = _normalize_list(creates)
     requires_list = _normalize_list(requires)
 
+    creates_list, creates_flags = _pull_flags(creates_list)
+    requires_list, requires_flags = _pull_flags(requires_list)
+
     def decorator(func: Callable[..., T]) -> Callable[..., T]:
         # Validate AST before wrapping the function
         validate_step_requirements(func, requires_list)
@@ -180,6 +207,7 @@ def step(
             # Setup and validation
             analysis_obj, remaining_args = _validate_instance_method(args)
             _check_requirements(analysis_obj, requires_list)
+            _check_required_flags(analysis_obj, requires_flags)
 
             # Handle existing results
             existing = _handle_existing_attributes(
@@ -213,6 +241,9 @@ def step(
             with ResultsLock.allow_mutation():
                 # Store the results
                 _store_results(analysis_obj, creates_list, result)
+
+                # Set the flags
+                _set_flags(analysis_obj, creates_flags)
 
                 # Store the metadata
                 _store_metadata(analysis_obj, step_name, step_metadata)
