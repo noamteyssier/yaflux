@@ -89,7 +89,6 @@ Let's first define a complex analysis with multiple steps and dependencies:
 ```python
 import yaflux as yf
 
-
 class MyAnalysis(yf.Base):
 
     @yf.step(creates=["x", "y", "z"])
@@ -100,7 +99,7 @@ class MyAnalysis(yf.Base):
     def process_x(self) -> int:
         return self.results.x + 1
 
-    @yf.step(creates=["proc_y1", "proc_y2"], requires="y")
+    @yf.step(creates=["proc_y1", "proc_y2", "_marked"], requires="y")
     def process_y(self) -> tuple[int, int]:
         return (
             self.results.y + 1,
@@ -111,16 +110,9 @@ class MyAnalysis(yf.Base):
     def process_z(self) -> int:
         return self.results.proc_y1 + self.results.proc_y2 + self.results.z
 
-    @yf.step(creates="final", requires=["proc_x", "proc_z"])
+    @yf.step(creates="final", requires=["proc_x", "proc_z", "_marked"])
     def final(self) -> int:
         return self.results.proc_x + self.results.proc_z
-
-    def run(self):
-        self.load_data()
-        self.process_x()
-        self.process_y()
-        self.process_z()
-        self.final()
 ```
 
 Now we can visualize the dependencies between the analysis steps:
