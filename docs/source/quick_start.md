@@ -250,20 +250,56 @@ A useful feature of `yaflux` is the ability to visualize the analysis steps.
 
 You can generate a graph of the analysis workflow using the `visualize_dependencies` method:
 
+Let's first define a complex analysis with multiple steps and dependencies:
+
+```python
+import yaflux as yf
+
+class MyAnalysis(yf.Base):
+
+    @yf.step(creates=["x", "y", "z"])
+    def load_data(self) -> tuple[int, int, int]:
+        return 1, 2, 3
+
+    @yf.step(creates="proc_x", requires="x")
+    def process_x(self) -> int:
+        return self.results.x + 1
+
+    @yf.step(creates=["proc_y1", "proc_y2", "_marked"], requires="y")
+    def process_y(self) -> tuple[int, int]:
+        return (
+            self.results.y + 1,
+            self.results.y + 2,
+        )
+
+    @yf.step(creates="proc_z", requires=["proc_y1", "proc_y2", "z"])
+    def process_z(self) -> int:
+        return self.results.proc_y1 + self.results.proc_y2 + self.results.z
+
+    @yf.step(creates="final", requires=["proc_x", "proc_z", "_marked"])
+    def final(self) -> int:
+        return self.results.proc_x + self.results.proc_z
+```
+
+You can then visualize the dependencies between the analysis steps:
+
 ```python
 analysis = MyAnalysis()
 analysis.visualize_dependencies()
 ```
 
 This will create a graph of the analysis steps and their dependencies, which can help you understand the workflow structure.
-![Alt text](./assets/example_workflow.svg)
+![Alt text](./assets/complex_workflow_init.svg)
 
 As we run analysis steps this workflow will update to reflect the current state of the analysis.
 
 ```python
-analysis.workflow_step_a()
-analysis.workflow_step_b()
+analysis.load_data()
+analysis.process_x()
+analysis.process_y()
 analysis.visualize_dependencies()
 ```
 
-![Alt text](./assets/example_workflow_filled.svg)
+![Alt text](./assets/complex_workflow_progress.svg)
+
+This can be useful for understanding complex workflows and ensuring that all dependencies are correctly specified.
