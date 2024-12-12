@@ -2,7 +2,7 @@ from typing import Any
 
 from .._metadata import Metadata
 from ._error import FlagError, UnauthorizedMutationError
-from ._lock import ResultsLock
+from ._lock import FlagLock, ResultsLock
 
 
 class Results:
@@ -40,8 +40,10 @@ class Results:
             )
         if name == "_data":
             raise AttributeError(f"Cannot delete attribute '{name}'")
-        elif name.startswith("_") and hasattr(self, name):
-            raise FlagError(f"Cannot delete flag once set: {name}")
+
+        if not FlagLock.can_mutate():
+            if name.startswith("_") and hasattr(self, name) and name != "_data":
+                raise FlagError(f"Cannot delete flag once set: {name}")
         try:
             del self._data[name]
         except KeyError as exc:
@@ -54,8 +56,10 @@ class Results:
             )
         if name == "_data":
             object.__setattr__(self, name, value)
-        elif name.startswith("_") and hasattr(self, name):
-            raise FlagError(f"Cannot modify flag once set: {name}")
+
+        if not FlagLock.can_mutate():
+            if name.startswith("_") and hasattr(self, name) and name != "_data":
+                raise FlagError(f"Cannot modify flag once set: {name}")
         else:
             self._data[name] = value
 
