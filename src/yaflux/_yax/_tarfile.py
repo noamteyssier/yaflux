@@ -5,7 +5,12 @@ from datetime import datetime
 from io import BytesIO
 from typing import Any, Dict, List
 
-from ._error import MissingResultError
+from ._error import (
+    YaxMissingParametersFileError,
+    YaxMissingResultError,
+    YaxMissingResultFileError,
+    YaxMissingVersionFileError,
+)
 from ._toml import _format_toml_section
 
 
@@ -168,12 +173,12 @@ class TarfileSerializer:
 
             # Validate version
             if "version" not in metadata:
-                raise ValueError("Invalid yaflux archive: missing version in metadata")
+                raise YaxMissingVersionFileError("Invalid yaflux archive: missing version in metadata")
 
             # Load parameters
             parameters_file = tar.extractfile("parameters.pkl")
             if parameters_file is None:
-                raise ValueError("Invalid yaflux archive: missing parameters.pkl")
+                raise YaxMissingParametersFileError("Invalid yaflux archive: missing parameters.pkl")
             metadata["parameters"] = pickle.loads(parameters_file.read())
 
             # Handle selective loading
@@ -189,7 +194,7 @@ class TarfileSerializer:
             if select is not None:
                 invalid = set(select) - set(available_results)
                 if invalid:
-                    raise MissingResultError(f"Requested results not found: {invalid}")
+                    raise YaxMissingResultError(f"Requested results not found: {invalid}")
                 to_load = set(select)
             if exclude is not None:
                 to_load -= set(exclude)
@@ -200,7 +205,7 @@ class TarfileSerializer:
                 result_path = os.path.join(cls.RESULTS_DIR, f"{key}.pkl")
                 result_file = tar.extractfile(result_path)
                 if result_file is None:
-                    raise ValueError(f"Missing result file: {result_path}")
+                    raise YaxMissingResultFileError(f"Missing result file: {result_path}")
                 results[key] = pickle.loads(result_file.read())
 
             return metadata, results

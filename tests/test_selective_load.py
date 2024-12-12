@@ -75,7 +75,7 @@ def test_selective_loading_select_non_existent():
     try:
         MyAnalysis.load(TMP_PATH, select="non_existent")
         assert False
-    except yf.MissingResultError:
+    except yf.YaxMissingResultError:
         assert True
     delete_tmp(TMP_PATH)
 
@@ -84,7 +84,7 @@ def test_selective_loading_select_non_existent_list():
     try:
         MyAnalysis.load(TMP_PATH, select=["non_existent"])
         assert False
-    except yf.MissingResultError:
+    except yf.YaxMissingResultError:
         assert True
     delete_tmp(TMP_PATH)
 

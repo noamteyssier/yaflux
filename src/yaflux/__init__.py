@@ -3,7 +3,12 @@ from ._loaders import load_analysis, load_portable, to_portable
 from ._portable import Portable
 from ._results import FlagError, UnauthorizedMutationError
 from ._step import step
-from ._yax import MissingResultError
+from ._yax import (
+    YaxMissingParametersFileError,
+    YaxMissingResultError,
+    YaxMissingResultFileError,
+    YaxMissingVersionFileError,
+)
 
 __all__ = [
     "Base",
@@ -14,5 +19,8 @@ __all__ = [
     "to_portable",
     "UnauthorizedMutationError",
     "FlagError",
-    "MissingResultError",
+    "YaxMissingResultError",
+    "YaxMissingResultFileError",
+    "YaxMissingVersionFileError",
+    "YaxMissingParametersFileError",
 ]
