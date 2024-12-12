@@ -24,9 +24,9 @@ class ThreadSafeLock:
             cls._thread_local.can_mutate = previous
 
 
-
 class ResultsLock(ThreadSafeLock):
     """Context manager for controlling results mutation."""
+
 
 class FlagLock(ThreadSafeLock):
     """Context manager for controlling flag mutation."""

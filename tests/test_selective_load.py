@@ -26,9 +26,11 @@ def run_and_save(path: str):
     analysis.final_process()
     analysis.save(path, force=True)
 
+
 def delete_tmp(path):
     if os.path.exists(path):
         os.remove(path)
+
 
 def test_full_loading():
     run_and_save(TMP_PATH)
@@ -38,6 +40,7 @@ def test_full_loading():
     assert analysis.results.final_data == [11, 22, 33, 44, 55]
     delete_tmp(TMP_PATH)
 
+
 def test_select_loading_no_results():
     run_and_save(TMP_PATH)
     analysis = MyAnalysis.load(TMP_PATH, select=[])
@@ -45,6 +48,7 @@ def test_select_loading_no_results():
     assert not hasattr(analysis.results, "mixin_data")
     assert not hasattr(analysis.results, "final_data")
     delete_tmp(TMP_PATH)
+
 
 def test_selective_loading_select_as_str():
     run_and_save(TMP_PATH)
@@ -54,6 +58,7 @@ def test_selective_loading_select_as_str():
     assert not hasattr(analysis.results, "final_data")
     delete_tmp(TMP_PATH)
 
+
 def test_selective_loading_select_as_list():
     run_and_save(TMP_PATH)
     analysis = MyAnalysis.load(TMP_PATH, select=["mixin_data"])
@@ -62,6 +67,7 @@ def test_selective_loading_select_as_list():
     assert not hasattr(analysis.results, "final_data")
     delete_tmp(TMP_PATH)
 
+
 def test_selective_loading_select_multiple():
     run_and_save(TMP_PATH)
     analysis = MyAnalysis.load(TMP_PATH, select=["mixin_data", "base_data"])
@@ -69,6 +75,7 @@ def test_selective_loading_select_multiple():
     assert analysis.results.mixin_data == [10, 20, 30, 40, 50]
     assert not hasattr(analysis.results, "final_data")
     delete_tmp(TMP_PATH)
+
 
 def test_selective_loading_select_non_existent():
     run_and_save(TMP_PATH)
@@ -79,6 +86,7 @@ def test_selective_loading_select_non_existent():
         assert True
     delete_tmp(TMP_PATH)
 
+
 def test_selective_loading_select_non_existent_list():
     run_and_save(TMP_PATH)
     try:
@@ -88,6 +96,7 @@ def test_selective_loading_select_non_existent_list():
         assert True
     delete_tmp(TMP_PATH)
 
+
 def test_selective_loading_exclude_as_str():
     run_and_save(TMP_PATH)
     analysis = MyAnalysis.load(TMP_PATH, exclude="mixin_data")
@@ -95,6 +104,7 @@ def test_selective_loading_exclude_as_str():
     assert not hasattr(analysis.results, "mixin_data")
     assert analysis.results.final_data == [11, 22, 33, 44, 55]
     delete_tmp(TMP_PATH)
+
 
 def test_selective_loading_exclude_as_list():
     run_and_save(TMP_PATH)
@@ -104,6 +114,7 @@ def test_selective_loading_exclude_as_list():
     assert analysis.results.final_data == [11, 22, 33, 44, 55]
     delete_tmp(TMP_PATH)
 
+
 def test_selective_loading_exclude_multiple():
     run_and_save(TMP_PATH)
     analysis = MyAnalysis.load(TMP_PATH, exclude=["mixin_data", "base_data"])
@@ -112,14 +123,16 @@ def test_selective_loading_exclude_multiple():
     assert analysis.results.final_data == [11, 22, 33, 44, 55]
     delete_tmp(TMP_PATH)
 
+
 def test_selective_loading_exclude_non_existent():
     run_and_save(TMP_PATH)
-    MyAnalysis.load(TMP_PATH, exclude="non_existent") # Should not raise
+    MyAnalysis.load(TMP_PATH, exclude="non_existent")  # Should not raise
     delete_tmp(TMP_PATH)
+
 
 def test_selective_loading_exclude_non_existent_list():
     run_and_save(TMP_PATH)
-    MyAnalysis.load(TMP_PATH, exclude=["non_existent"]) # Should not raise
+    MyAnalysis.load(TMP_PATH, exclude=["non_existent"])  # Should not raise
     delete_tmp(TMP_PATH)
 
 

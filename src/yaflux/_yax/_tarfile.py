@@ -43,18 +43,18 @@ class TarfileSerializer:
             "archive_info": {
                 "version": metadata["version"],
                 "created": datetime.fromtimestamp(metadata["timestamp"]).isoformat(),
-                "yaflux_format": cls.VERSION
+                "yaflux_format": cls.VERSION,
             },
             "analysis": {
                 "completed_steps": sorted(metadata["completed_steps"]),
                 "step_ordering": metadata["step_ordering"],
-                "parameters": str(metadata["parameters"])
+                "parameters": str(metadata["parameters"]),
             },
             "results": {
                 name: {
                     "type": type(value).__name__,
                     "module": type(value).__module__,
-                    "size_bytes": len(pickle.dumps(value))
+                    "size_bytes": len(pickle.dumps(value)),
                 }
                 for name, value in results.items()
             },
@@ -63,12 +63,10 @@ class TarfileSerializer:
                     "creates": sorted(info.creates),
                     "requires": sorted(info.requires),
                     "elapsed": info.elapsed,
-                    "timestamp": (
-                        datetime.fromtimestamp(info.timestamp).isoformat()
-                    )
+                    "timestamp": (datetime.fromtimestamp(info.timestamp).isoformat()),
                 }
                 for step, info in metadata["step_metadata"].items()
-            }
+            },
         }
 
         return "\n".join(_format_toml_section(manifest))
@@ -114,7 +112,7 @@ class TarfileSerializer:
 
             # Create and add manifest
             manifest = cls._create_manifest(yax_metadata, analysis._results._data)
-            manifest_bytes = BytesIO(manifest.encode('utf-8'))
+            manifest_bytes = BytesIO(manifest.encode("utf-8"))
             manifest_info = tarfile.TarInfo(cls.MANIFEST_NAME)
             manifest_info.size = len(manifest_bytes.getvalue())
             tar.addfile(manifest_info, manifest_bytes)
@@ -133,15 +131,14 @@ class TarfileSerializer:
                 result_info.size = len(result_bytes.getvalue())
                 tar.addfile(result_info, result_bytes)
 
-
     @classmethod
     def load(
         cls,
         filepath: str,
         *,
         no_results: bool = False,
-        select: List[str]| str | None = None,
-        exclude: List[str]| str | None= None,
+        select: List[str] | str | None = None,
+        exclude: List[str] | str | None = None,
     ) -> tuple[Dict[str, Any], Dict[str, Any]]:
         """Load analysis from yaflux archive format.
 
@@ -173,12 +170,16 @@ class TarfileSerializer:
 
             # Validate version
             if "version" not in metadata:
-                raise YaxMissingVersionFileError("Invalid yaflux archive: missing version in metadata")
+                raise YaxMissingVersionFileError(
+                    "Invalid yaflux archive: missing version in metadata"
+                )
 
             # Load parameters
             parameters_file = tar.extractfile("parameters.pkl")
             if parameters_file is None:
-                raise YaxMissingParametersFileError("Invalid yaflux archive: missing parameters.pkl")
+                raise YaxMissingParametersFileError(
+                    "Invalid yaflux archive: missing parameters.pkl"
+                )
             metadata["parameters"] = pickle.loads(parameters_file.read())
 
             # Handle selective loading
@@ -194,7 +195,9 @@ class TarfileSerializer:
             if select is not None:
                 invalid = set(select) - set(available_results)
                 if invalid:
-                    raise YaxMissingResultError(f"Requested results not found: {invalid}")
+                    raise YaxMissingResultError(
+                        f"Requested results not found: {invalid}"
+                    )
                 to_load = set(select)
             if exclude is not None:
                 to_load -= set(exclude)
@@ -205,7 +208,9 @@ class TarfileSerializer:
                 result_path = os.path.join(cls.RESULTS_DIR, f"{key}.pkl")
                 result_file = tar.extractfile(result_path)
                 if result_file is None:
-                    raise YaxMissingResultFileError(f"Missing result file: {result_path}")
+                    raise YaxMissingResultFileError(
+                        f"Missing result file: {result_path}"
+                    )
                 results[key] = pickle.loads(result_file.read())
 
             return metadata, results
