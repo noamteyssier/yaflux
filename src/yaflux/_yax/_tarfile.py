@@ -5,6 +5,7 @@ from datetime import datetime
 from io import BytesIO
 from typing import Any, Dict, List
 
+from ._error import MissingResultError
 from ._toml import _format_toml_section
 
 
@@ -188,7 +189,7 @@ class TarfileSerializer:
             if select is not None:
                 invalid = set(select) - set(available_results)
                 if invalid:
-                    raise ValueError(f"Requested results not found: {invalid}")
+                    raise MissingResultError(f"Requested results not found: {invalid}")
                 to_load = set(select)
             if exclude is not None:
                 to_load -= set(exclude)
