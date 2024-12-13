@@ -13,10 +13,10 @@ class Portable(Base):
 
     def __init__(
         self,
-        parameters: Any,
-        results: Dict[str, Any],
-        completed_steps: List[str],
-        step_metadata: Dict[str, Dict[str, List[str]]],
+        parameters: Any | None = None,
+        results: Dict[str, Any] | None = None,
+        completed_steps: List[str] | None = None,
+        step_metadata: Dict[str, Dict[str, List[str]]] | None = None,
     ):
         # Initialize Base with parameters
         super().__init__(parameters)
