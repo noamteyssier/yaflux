@@ -176,6 +176,6 @@ try:
     from ._viz import _check_graphviz, visualize_dependencies
 
     if _check_graphviz():
-        Base.visualize_dependencies = visualize_dependencies
+        Base.visualize_dependencies = visualize_dependencies # type: ignore
 except ImportError:
     pass  # Keep the stub method
