@@ -1,5 +1,8 @@
 import os
+
 import yaflux as yf
+
+OUTPUT_PATH = "serde_tmp.yax"
 
 
 class SerdeTesting(yf.Base):
@@ -21,16 +24,16 @@ def test_serde():
 
     # Delete the file just in case it exists
     # We will test the overwrite condition later
-    if os.path.exists("tmp.pkl"):
-        os.remove("tmp.pkl")
+    if os.path.exists(OUTPUT_PATH):
+        os.remove(OUTPUT_PATH)
 
     # Save and reload
-    analysis.save(filepath="tmp.pkl")
-    reloaded = analysis.load(filepath="tmp.pkl")
+    analysis.save(filepath=OUTPUT_PATH)
+    reloaded = analysis.load(filepath=OUTPUT_PATH)
 
     # Delete the file
-    if os.path.exists("tmp.pkl"):
-        os.remove("tmp.pkl")
+    if os.path.exists(OUTPUT_PATH):
+        os.remove(OUTPUT_PATH)
 
     assert reloaded.results.res_a == 42
     assert reloaded.results.res_b == 42
@@ -42,33 +45,33 @@ def test_save_panic_on_found():
     analysis = SerdeTesting(parameters=None)
 
     # Ensure that the file exists
-    if not os.path.exists("tmp.pkl"):
-        with open("tmp.pkl", "w") as f:
+    if not os.path.exists(OUTPUT_PATH):
+        with open(OUTPUT_PATH, "w") as f:
             f.write("")
 
     # Try saving
     try:
-        analysis.save(filepath="tmp.pkl")
+        analysis.save(filepath=OUTPUT_PATH)
         assert False
     except FileExistsError:
         pass
 
     # Delete the file
-    if os.path.exists("tmp.pkl"):
-        os.remove("tmp.pkl")
+    if os.path.exists(OUTPUT_PATH):
+        os.remove(OUTPUT_PATH)
 
 
 def test_save_overwrite():
     analysis = SerdeTesting(parameters=None)
 
     # Ensure that the file exists
-    if not os.path.exists("tmp.pkl"):
-        with open("tmp.pkl", "w") as f:
+    if not os.path.exists(OUTPUT_PATH):
+        with open(OUTPUT_PATH, "w") as f:
             f.write("")
 
     # Save and reload
-    analysis.save(filepath="tmp.pkl", force=True)
+    analysis.save(filepath=OUTPUT_PATH, force=True)
 
     # Delete the file
-    if os.path.exists("tmp.pkl"):
-        os.remove("tmp.pkl")
+    if os.path.exists(OUTPUT_PATH):
+        os.remove(OUTPUT_PATH)
