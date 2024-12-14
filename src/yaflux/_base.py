@@ -1,5 +1,3 @@
-import os
-import pickle
 from typing import Any, Optional
 
 from ._metadata import Metadata
@@ -101,7 +99,6 @@ class Base:
         """Save the analysis to a file.
 
         If the filepath ends in .yax, saves in yaflux archive format.
-        Otherwise uses legacy pickle format.
 
         Parameters
         ----------
@@ -111,14 +108,11 @@ class Base:
             Whether to overwrite existing file, by default False
         """
         if filepath.endswith(TarfileSerializer.EXTENSION):
-            # Use yaflux archive format
             TarfileSerializer.save(filepath, self, force)
         else:
-            # Use legacy pickle format
-            if not force and os.path.exists(filepath):
-                raise FileExistsError(f"File already exists: '{filepath}'")
-            with open(filepath, "wb") as file:
-                pickle.dump(self, file)
+            TarfileSerializer.save(
+                f"{filepath}.{TarfileSerializer.EXTENSION}", self, force
+            )
 
     @classmethod
     def load(
