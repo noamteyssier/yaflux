@@ -91,6 +91,32 @@ The `Results` class implementation provides:
 3. Clear separation between results and computation
 4. Built-in metadata tracking
 
+### Custom Serialization
+
+`yaflux` uses a combination of Python's built-in `pickle` module and built-in TAR file support for serialization.
+This choice was made to allow for arbitrary Python objects to be stored without additional dependencies but also allow for selective loading of results.
+This also provides built-in compression as the tar file is compressed by default with gzip.
+
+TAR files are used to store multiple pickled objects in a single file, but traversing this file to selectively load objects is cheap and efficient because
+the entire file is not loaded into memory at once.
+
+All objects are also stored with a manifest which describes the type information the results, so in the case that versions change or the object is not available, the user can still see what the object was,
+and potentially reload specific results manually by unpacking the TAR file and unpickling the results.
+
+The structure of the TAR file is as follows:
+
+```text
+analysis.yax
+├── metadata.pkl
+├── manifest.toml
+├── parameters.pkl
+├── results/
+      ├── _metadata.pkl
+      ├── _data.pkl
+      ├── some_result_name.pkl
+      ├── ...
+```
+
 ## Design Tradeoffs
 
 ### Explicit vs. Implicit
