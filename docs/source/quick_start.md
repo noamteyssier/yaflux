@@ -205,7 +205,7 @@ We can easily save the analysis state to a file:
 
 ```python
 # We can save the analysis state to a file
-analysis.save("analysis.pkl")
+analysis.save("analysis.yax")
 ```
 
 ### Loading
@@ -218,7 +218,7 @@ If you have access to the original class definition, you can load the analysis s
 import yaflux as yf
 
 # We can load the analysis state from a file
-analysis = MyAnalysis.load("analysis.pkl")
+analysis = MyAnalysis.load("analysis.yax")
 
 # Access results
 results = analysis.results.final_data
@@ -241,7 +241,7 @@ Here's how you can load an analysis without the original class definition:
 
 ```python
 # Load the analysis state without the original class definition
-loaded_analysis = yf.load("analysis.pkl")
+loaded_analysis = yf.load("analysis.yax")
 ```
 
 ## Visualizing Analysis Steps
