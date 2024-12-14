@@ -32,8 +32,11 @@ def load(
         Skip specific results (yax format only), by default None
     """
     if TarfileSerializer.is_yaflux_archive(filepath):
+
         if cls is None:
-            cls = Base
+            build_cls = Base
+        else:
+            build_cls = cls
 
         metadata, results = TarfileSerializer.load(
             filepath, no_results=no_results, select=select, exclude=exclude
@@ -41,10 +44,10 @@ def load(
 
         try:
             # Load as original class
-            return _load_file(filepath, cls, metadata, results)
+            return _load_file(filepath, build_cls, metadata, results) # type: ignore
         except (AttributeError, ImportError, TypeError):
             # If loading as original class fails, load as `Base`
-            return _load_file(filepath, Base, metadata, results)
+            return _load_file(filepath, Base, metadata, results) # type: ignore
 
     else:
         raise YaxNotArchiveFileError(
