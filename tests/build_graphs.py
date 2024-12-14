@@ -30,7 +30,7 @@ if __name__ == "__main__":
         "./docs/source/assets/complex_workflow_init", format="svg", cleanup=True
     )
 
-    analysis.load_data()
+    analysis.load_data()  # type: ignore
     analysis.process_x()
     analysis.process_y()
 

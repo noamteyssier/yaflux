@@ -62,13 +62,13 @@ analysis.run()
 final = analysis.results.final_data
 
 # Save and load analysis state
-analysis.save("analysis.pkl")
+analysis.save("analysis.yax")
 
 # Load analysis state
-loaded = MyAnalysis.load("analysis.pkl")
+loaded = MyAnalysis.load("analysis.yax")
 
 # Load analysis without original class definition
-loaded = yf.load_portable("analysis.pkl")
+loaded = yf.Base.load("analysis.yax")
 
 # Skip redudant steps
 analysis.workflow_step_a() # skipped

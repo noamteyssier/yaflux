@@ -205,7 +205,7 @@ We can easily save the analysis state to a file:
 
 ```python
 # We can save the analysis state to a file
-analysis.save("analysis.pkl")
+analysis.save("analysis.yax")
 ```
 
 ### Loading
@@ -218,7 +218,10 @@ If you have access to the original class definition, you can load the analysis s
 import yaflux as yf
 
 # We can load the analysis state from a file
-analysis = MyAnalysis.load("analysis.pkl")
+analysis = MyAnalysis.load("analysis.yax")
+
+# Or load the analysis using the built-in load function
+analysis = yf.load("analysis.yax")
 
 # Access results
 results = analysis.results.final_data
@@ -241,7 +244,28 @@ Here's how you can load an analysis without the original class definition:
 
 ```python
 # Load the analysis state without the original class definition
-loaded_analysis = yf.load_portable("analysis.pkl")
+loaded_analysis = yf.load("analysis.yax")
+```
+
+#### Selective Loading
+
+Sometimes analysis states can be very large and for downstream analyses or visualizations you may only need a subset of the results.
+This is also useful when you only want to see what an analysis structure looks like without running it or needing to load the entire state.
+
+`yaflux` provides 4 ways to laod analysis states with selective loading:
+
+```python
+# Load the full analysis
+analysis = yf.load("analysis.yax")
+
+# Load the analysis without any results
+analysis = yf.load("analysis.yax", no_results=True)
+
+# Load the analysis with a selected subset of the results
+analysis = yf.load("analysis.yax", select=["raw_data", "processed_data"])
+
+# Load the analysis but exclude a subset of the results
+analysis = yf.load("analysis.yax", exclude="final_data")
 ```
 
 ## Visualizing Analysis Steps

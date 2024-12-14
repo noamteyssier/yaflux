@@ -1,11 +1,8 @@
-import os
-import pickle
 from typing import Any, Optional
 
-from yaflux._results._lock import ResultsLock
-
 from ._metadata import Metadata
-from ._results import Results
+from ._results import Results, ResultsLock
+from ._yax import TarfileSerializer
 
 
 class Base:
@@ -99,19 +96,62 @@ class Base:
         ]
 
     def save(self, filepath: str, force=False):
-        """Save the `Analysis` object to a file using pickle."""
-        if not force and os.path.exists(filepath):
-            raise FileExistsError(f"File already exists: '{filepath}'")
-        with open(filepath, "wb") as file:
-            pickle.dump(self, file)
+        """Save the analysis to a file.
+
+        If the filepath ends in .yax, saves in yaflux archive format.
+
+        Parameters
+        ----------
+        filepath : str
+            Path to save the analysis
+        force : bool, optional
+            Whether to overwrite existing file, by default False
+        """
+        if filepath.endswith(TarfileSerializer.EXTENSION):
+            TarfileSerializer.save(filepath, self, force)
+        else:
+            TarfileSerializer.save(
+                f"{filepath}.{TarfileSerializer.EXTENSION}", self, force
+            )
 
     @classmethod
-    def load(cls, filepath: str):
-        """Load an `Analysis` object from a file using pickle."""
-        with ResultsLock.allow_mutation():
-            with open(filepath, "rb") as file:
-                analysis = pickle.load(file)
-        return analysis
+    def load(
+        cls,
+        filepath: str,
+        *,
+        no_results: bool = False,
+        select: list[str] | str | None = None,
+        exclude: list[str] | str | None = None,
+    ):
+        """Load an analysis object from a file.
+
+        Parameters
+        ----------
+        filepath : str
+            Path to the analysis file. If it ends in .yax, loads using yaflux archive format.
+            Otherwise attempts to load as legacy pickle format.
+        no_results : bool, optional
+            Only load metadata (yaflux archive format only), by default False
+        select : Optional[List[str]], optional
+            Only load specific results (yaflux archive format only), by default None
+        exclude : Optional[List[str]], optional
+            Skip specific results (yaflux archive format only), by default None
+
+        Returns
+        -------
+        Analysis
+            The loaded analysis object
+
+        Raises
+        ------
+        ValueError
+            If selective loading is attempted with legacy pickle format
+        """
+        from ._loaders import load
+
+        return load(
+            filepath, cls, no_results=no_results, select=select, exclude=exclude
+        )
 
     def visualize_dependencies(self, *args, **kwargs):
         """Create a visualization of step dependencies.
@@ -136,6 +176,6 @@ try:
     from ._viz import _check_graphviz, visualize_dependencies
 
     if _check_graphviz():
-        Base.visualize_dependencies = visualize_dependencies
+        Base.visualize_dependencies = visualize_dependencies  # type: ignore
 except ImportError:
     pass  # Keep the stub method
