@@ -2,10 +2,8 @@ import os
 import pickle
 from typing import Any, Optional
 
-from yaflux._results._lock import FlagLock, ResultsLock
-
 from ._metadata import Metadata
-from ._results import Results
+from ._results import Results, ResultsLock
 from ._yax import TarfileSerializer
 
 
@@ -155,35 +153,11 @@ class Base:
         ValueError
             If selective loading is attempted with legacy pickle format
         """
-        # Check if file is in yaflux archive format
-        if TarfileSerializer.is_yaflux_archive(filepath):
-            with ResultsLock.allow_mutation() and FlagLock.allow_mutation():
-                metadata, results = TarfileSerializer.load(
-                    filepath, no_results=no_results, select=select, exclude=exclude
-                )
+        from ._loaders import load
 
-                # Create new instance
-                instance = cls(parameters=metadata["parameters"])
-
-                # Restore state
-                instance.parameters = metadata["parameters"]
-                instance._completed_steps = set(metadata["completed_steps"])
-                instance._step_ordering = metadata.get("step_ordering", [])
-                instance._results._data = results
-                instance._results._metadata = metadata["step_metadata"]
-
-                return instance
-
-        # Legacy pickle format
-        if no_results or select or exclude:
-            raise ValueError(
-                "Selective loading is only supported for .yax format. "
-                "This appears to be a legacy pickle file."
-            )
-
-        with ResultsLock.allow_mutation():
-            with open(filepath, "rb") as file:
-                return pickle.load(file)
+        return load(
+            filepath, cls, no_results=no_results, select=select, exclude=exclude
+        )
 
     def visualize_dependencies(self, *args, **kwargs):
         """Create a visualization of step dependencies.
