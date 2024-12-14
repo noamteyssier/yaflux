@@ -3,6 +3,8 @@ import time
 
 import yaflux as yf
 
+OUTPUT_PATH = "large_tmp.yax"
+
 
 class MyAnalysis(yf.Base):
     """"""
@@ -36,13 +38,36 @@ def time_load(filepath: str, **kwargs):
 
 
 def test_time_selective_time_diff():
-    filepath = "test_analysis.yax"
-    run_and_save_analysis(filepath)
+    run_and_save_analysis(OUTPUT_PATH)
 
     try:
-        elapsed_no_select = time_load(filepath)
-        elapsed_with_select = time_load(filepath, select="sum")
+        elapsed_no_select = time_load(OUTPUT_PATH)
+        elapsed_with_select = time_load(OUTPUT_PATH, select="sum")
         assert elapsed_with_select < elapsed_no_select
 
     finally:
-        delete_file(filepath)
+        delete_file(OUTPUT_PATH)
+
+
+def test_time_exclusive_time_diff():
+    run_and_save_analysis(OUTPUT_PATH)
+
+    try:
+        elapsed_no_select = time_load(OUTPUT_PATH)
+        elapsed_with_select = time_load(OUTPUT_PATH, exclude="large_obj")
+        assert elapsed_with_select < elapsed_no_select
+
+    finally:
+        delete_file(OUTPUT_PATH)
+
+
+def test_time_no_results_time_diff():
+    run_and_save_analysis(OUTPUT_PATH)
+
+    try:
+        elapsed_no_select = time_load(OUTPUT_PATH)
+        elapsed_with_select = time_load(OUTPUT_PATH, no_results=True)
+        assert elapsed_with_select < elapsed_no_select
+
+    finally:
+        delete_file(OUTPUT_PATH)
