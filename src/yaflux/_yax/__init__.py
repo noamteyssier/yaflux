@@ -3,6 +3,7 @@ from ._error import (
     YaxMissingResultError,
     YaxMissingResultFileError,
     YaxMissingVersionFileError,
+    YaxNotArchiveFileError,
 )
 from ._tarfile import TarfileSerializer
 
@@ -12,4 +13,5 @@ __all__ = [
     "YaxMissingResultFileError",
     "YaxMissingVersionFileError",
     "YaxMissingParametersFileError",
+    "YaxNotArchiveFileError",
 ]

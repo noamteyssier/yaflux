@@ -1,6 +1,5 @@
 from ._base import Base
-from ._loaders import load_analysis, load_portable
-from ._portable import Portable
+from ._loaders import load
 from ._results import FlagError, UnauthorizedMutationError
 from ._step import step
 from ._yax import (
@@ -13,14 +12,12 @@ from ._yax import (
 __all__ = [
     "Base",
     "step",
-    "Portable",
-    "load_analysis",
-    "load_portable",
-    "to_portable",
+    "load"
     "UnauthorizedMutationError",
     "FlagError",
     "YaxMissingResultError",
     "YaxMissingResultFileError",
     "YaxMissingVersionFileError",
     "YaxMissingParametersFileError",
+    "YaxNotArchiveFileError",
 ]

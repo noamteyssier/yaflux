@@ -12,3 +12,7 @@ class YaxMissingVersionFileError(Exception):
 
 class YaxMissingParametersFileError(Exception):
     """Raised when the parameters file is missing from the tarfile."""
+
+
+class YaxNotArchiveFileError(Exception):
+    """Raised when the file is not a yax archive."""
