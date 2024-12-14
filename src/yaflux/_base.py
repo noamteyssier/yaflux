@@ -34,6 +34,10 @@ class Base:
         self._step_ordering = []  # Hidden attribute to store the order of performed steps
         self.parameters = parameters
 
+        from ._executor import Executor  # Avoid circular import
+
+        self._executor = Executor(self)
+
     @property
     def results(self) -> Results:
         """Get the current analysis results."""
@@ -170,6 +174,21 @@ class Base:
             "graphviz package is required for visualization. "
             "Install with: pip install yaflux[viz]"
         )
+
+    def execute(
+        self,
+        target_step: Optional[str] = None,
+        force: bool = False,
+        panic_on_existing: bool = False,
+    ) -> Any:
+        """Execute analysis steps in dependency order up to target_step."""
+        return self._executor.execute(
+            target_step=target_step, force=force, panic_on_existing=panic_on_existing
+        )
+
+    def execute_all(self, force: bool = False, panic_on_existing: bool = False) -> None:
+        """Execute all available steps in the analysis."""
+        self._executor.execute_all(force=force, panic_on_existing=panic_on_existing)
 
 
 try:
