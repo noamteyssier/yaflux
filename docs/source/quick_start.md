@@ -241,7 +241,7 @@ Here's how you can load an analysis without the original class definition:
 
 ```python
 # Load the analysis state without the original class definition
-loaded_analysis = yf.load_portable("analysis.pkl")
+loaded_analysis = yf.load("analysis.pkl")
 ```
 
 ## Visualizing Analysis Steps

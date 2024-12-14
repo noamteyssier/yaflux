@@ -68,7 +68,7 @@ analysis.save("analysis.pkl")
 loaded = MyAnalysis.load("analysis.pkl")
 
 # Load analysis without original class definition
-loaded = yf.load_portable("analysis.pkl")
+loaded = yf.Base.load("analysis.pkl")
 
 # Skip redudant steps
 analysis.workflow_step_a() # skipped
