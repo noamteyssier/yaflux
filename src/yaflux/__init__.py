@@ -12,7 +12,7 @@ from ._yax import (
 __all__ = [
     "Base",
     "step",
-    "load"
+    "load",
     "UnauthorizedMutationError",
     "FlagError",
     "YaxMissingResultError",
