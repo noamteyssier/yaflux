@@ -166,7 +166,7 @@ class Base:
                 instance = cls(parameters=metadata["parameters"])
 
                 # Restore state
-                instance._parameters = metadata["parameters"]
+                instance.parameters = metadata["parameters"]
                 instance._completed_steps = set(metadata["completed_steps"])
                 instance._step_ordering = metadata.get("step_ordering", [])
                 instance._results._data = results
