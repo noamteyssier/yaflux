@@ -159,7 +159,7 @@ def test_force_rerun_inheritance():
     initial_data = analysis.results.base_data.copy()
 
     # Force rerun should work
-    analysis.load_base_data(force=True) # type: ignore
+    analysis.load_base_data(force=True)  # type: ignore
     assert analysis.results.base_data == initial_data  # Data should be the same
 
     # Check that downstream steps still work

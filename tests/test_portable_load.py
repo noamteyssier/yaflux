@@ -120,7 +120,7 @@ def test_load_without_class():
 
     try:
         # Mock loading without class by passing Base
-        loaded = yf.load(filepath, cls=SomeClass) # type: ignore
+        loaded = yf.load(filepath, cls=SomeClass)  # type: ignore
 
         # Should fall back to portable
         assert loaded.results.res_a == 42
