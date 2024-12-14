@@ -11,7 +11,7 @@ class MyAnalysis(yf.Base):
 
     @yf.step(creates="large_obj")
     def build_very_large_object(self) -> list[int]:
-        return [i for i in range(10**4)]
+        return [i for i in range(10**5)]
 
     @yf.step(creates="sum", requires="large_obj")
     def sum_large_object(self) -> int:
