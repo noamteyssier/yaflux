@@ -7,6 +7,7 @@ from ._yax import (
     YaxMissingResultError,
     YaxMissingResultFileError,
     YaxMissingVersionFileError,
+    YaxNotArchiveFileError,
 )
 
 __all__ = [
