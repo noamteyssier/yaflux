@@ -13,7 +13,7 @@ def _get_leftmost_name(node) -> str | None:
     return None
 
 
-def _build_assignment_name(node) -> str | None:
+def _build_assignment_name(node) -> str:
     """Returns the full assignment path to the leftmost name in an assignment node.
 
     i.e.
@@ -24,7 +24,8 @@ def _build_assignment_name(node) -> str | None:
         return node.id
     if isinstance(node, ast.Attribute):
         return _build_assignment_name(node.value) + "." + node.attr
-    return None
+    else:
+        raise ValueError("Unexpected node type in assignment")
 
 
 class AssignmentVisitor(ast.NodeVisitor):
