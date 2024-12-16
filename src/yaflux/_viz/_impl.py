@@ -64,7 +64,7 @@ def visualize_dependencies(self, **kwargs):
             "Install with `pip install yaflux[viz]`"
         )
     else:
-        from graphviz import Digraph # type: ignore # noqa
+        from graphviz import Digraph  # type: ignore # noqa
     _check_dot_exists()
 
     # Get configuration options
