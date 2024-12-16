@@ -33,6 +33,7 @@ def add_edge(
     is_complete: bool,
     from_node_type: Literal["step", "result", "flag"],
     to_node_type: Literal["step", "result", "flag"],
+    is_mutation: bool = False,
 ) -> None:
     """Add an edge to the graph with appropriate styling"""
     dot.edge(
@@ -42,6 +43,7 @@ def add_edge(
         color=color_set["complete_line"]
         if is_complete
         else color_set["incomplete_line"],
+        style="dashed" if is_mutation else "solid",
     )
 
 
@@ -141,6 +143,32 @@ def visualize_dependencies(self, **kwargs):
                 is_step_complete,
                 "result",
                 "step",
+            )
+
+        # Add mutates edges
+        for mut in method.mutates:
+            if mut not in result_nodes:
+                is_mut_complete = hasattr(self.results, mut)
+                add_node(dot, mut, "result", is_mut_complete, config)
+                result_nodes.add(mut)
+            add_edge(
+                dot,
+                mut,
+                step_name,
+                config.result_colors,
+                is_step_complete,
+                "result",
+                "step",
+            )
+            add_edge(
+                dot,
+                step_name,
+                mut,
+                config.result_colors,
+                is_step_complete,
+                "step",
+                "result",
+                is_mutation=True,
             )
 
         # Add flag requirement edges
