@@ -173,8 +173,9 @@ def _filter_valid_kwargs(func: Callable, kwargs: dict) -> dict:
 
 
 def step(
-    creates: Optional[Union[list[str], str]] = None,
-    requires: Optional[Union[list[str], str]] = None,
+    creates: list[str] | str | None = None,
+    requires: list[str] | str | None = None,
+    mutates: list[str] | str | None = None,
 ) -> Callable:
     """Decorator to register analysis steps and their results.
 
@@ -184,6 +185,8 @@ def step(
         Names of the results this step creates
     requires : str | list[str] | None
         Names of the results this step requires
+    mutates: str | list[str] | None
+        Names of the results this step mutates
 
     Attributes
     ----------
@@ -198,13 +201,14 @@ def step(
     """
     creates_list = _normalize_list(creates)
     requires_list = _normalize_list(requires)
+    mutates_list = _normalize_list(mutates)
 
     creates_list, creates_flags = _pull_flags(creates_list)
     requires_list, requires_flags = _pull_flags(requires_list)
 
     def decorator(func: Callable[..., T]) -> Callable[..., T]:
         # Validate AST before wrapping the function
-        validate_ast(func, requires=requires_list)
+        validate_ast(func, requires=requires_list, mutates=mutates_list)
 
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> T:
