@@ -119,6 +119,23 @@ def test_diamond_dependencies():
     assert analysis.results.merged == 5
 
 
+def test_flag_only_dependencies():
+    """Test execution with only flag dependencies"""
+
+    class FlagAnalysis(yf.Base):
+        @yf.step(creates="_flag_a")
+        def set_flag(self) -> None:
+            pass
+
+        @yf.step(requires="_flag_a")
+        def use_flag(self) -> None:
+            pass
+
+    analysis = FlagAnalysis()
+    analysis.execute_all()
+    assert "_flag_a" in dir(analysis.results)
+
+
 def test_non_dag_analysis_missing_start():
     analysis = MissingStart()
     # analysis.visualize_dependencies().render("missing_start", cleanup=True)
