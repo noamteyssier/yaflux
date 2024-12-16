@@ -1,6 +1,6 @@
 from collections import deque
 from itertools import chain
-from typing import Any, Optional, TypeVar
+from typing import Any, Optional
 
 from .._base import Base
 from ._error import (
@@ -9,13 +9,11 @@ from ._error import (
     ExecutorMissingTargetStepError,
 )
 
-T = TypeVar("T", bound="Base")
-
 
 class Executor:
     """Handles execution order and dependency management for analysis pipelines."""
 
-    def __init__(self, analysis: "T"):
+    def __init__(self, analysis: "Base"):
         self._analysis = analysis
 
     def _get_dependency_graph(self) -> dict[str, set[str]]:
