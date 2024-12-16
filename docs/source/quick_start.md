@@ -38,15 +38,9 @@ class MyAnalysis(yf.Base):
     def workflow_step_c(self) -> list[int]:
         return [i + j for i in self.results.raw_data for j in self.results.processed_data]
 
-    # Define a complete workflow however you'd like
-    def run(self):
-        self.workflow_step_a()
-        self.workflow_step_b()
-        self.workflow_step_c()
-
 # Define and run an analysis
 analysis = MyAnalysis()
-analysis.run()
+analysis.execute()
 
 # Access results
 final = analysis.results.final_data
@@ -107,9 +101,7 @@ class MyAnalysis(yf.Base):
         return [i * 2 for i in self.results.raw_data]
 
 analysis = MyAnalysis()
-analysis.workflow_step_a()
-analysis.workflow_step_b()
-analysis.workflow_step_c()
+analysis.execute()
 ```
 
 Note that the results are not **reassigned** but **mutated** in place.
@@ -149,6 +141,22 @@ The benefit of using `yaflux` is that it automatically:
 
 This keeps your analysis organized and reproducible.
 It also keeps you from inadvertently running the same step multiple times or running steps out of order.
+
+### Runtime Inference
+
+When you run an analysis, `yaflux` will automatically infer the correct order of execution based on the dependencies you've specified.
+
+```python
+analysis = MyAnalysis()
+analysis.execute()
+```
+
+You can also run up to a specific step:
+
+```python
+analysis = MyAnalysis()
+analysis.execute(target_step="workflow_step_b")
+```
 
 ### Redundant Execution
 

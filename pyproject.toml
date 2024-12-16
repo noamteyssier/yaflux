@@ -1,6 +1,6 @@
 [project]
 name = "yaflux"
-version = "0.2.0"
+version = "0.2.1"
 description = "A lightweight, declarative framework for python analysis workflows."
 readme = "README.md"
 authors = [
@@ -26,9 +26,11 @@ docs = [
     "sphinx>=8.1.3",
 ]
 testing = ["pytest>=8.3.4"]
-linting = ["pyright>=1.1.390", "ruff>=0.8.2"]
+linting = ["ruff>=0.8.2"]
+type-checking = ["pyright>=1.1.390"]
 dev = [
     { include-group = "testing" },
     { include-group = "linting" },
+    { include-group = "type-checking" },
     { include-group = "docs" },
 ]
