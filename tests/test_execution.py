@@ -156,6 +156,20 @@ def test_orphaned_steps():
     assert "orphaned_step" in analysis.completed_steps
 
 
+def test_empty_analysis():
+    """Test handling of analysis with no steps"""
+
+    class EmptyAnalysis(yf.Base):
+        pass
+
+    analysis = EmptyAnalysis()
+    try:
+        analysis.execute_all()
+        assert False
+    except yf.ExecutorMissingStartError:
+        assert True
+
+
 def test_non_dag_analysis_missing_start():
     analysis = MissingStart()
     # analysis.visualize_dependencies().render("missing_start", cleanup=True)
