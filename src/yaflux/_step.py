@@ -286,6 +286,7 @@ def step(
         wrapper.requires = requires_list  # type: ignore
         wrapper.creates_flags = creates_flags  # type: ignore
         wrapper.requires_flags = requires_flags  # type: ignore
+        wrapper.mutates = mutates_list  # type: ignore
         return wrapper
 
     return decorator
