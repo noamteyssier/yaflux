@@ -136,6 +136,26 @@ def test_flag_only_dependencies():
     assert "_flag_a" in dir(analysis.results)
 
 
+def test_orphaned_steps():
+    """Test handling of steps with no connections to main graph"""
+
+    class OrphanedAnalysis(yf.Base):
+        @yf.step(creates="main")
+        def main_flow(self) -> int:
+            return 1
+
+        @yf.step(creates="orphaned")
+        def orphaned_step(self) -> int:
+            return 2
+
+    analysis = OrphanedAnalysis()
+    analysis.execute_all()
+
+    # Both steps should execute despite no dependencies
+    assert "main_flow" in analysis.completed_steps
+    assert "orphaned_step" in analysis.completed_steps
+
+
 def test_non_dag_analysis_missing_start():
     analysis = MissingStart()
     # analysis.visualize_dependencies().render("missing_start", cleanup=True)
