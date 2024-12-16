@@ -74,6 +74,26 @@ def test_complex_analysis():
     assert isinstance(analysis.results.res_e, int)
 
 
+def test_invalid_target_step():
+    analysis = ComplexAnalysis()
+    try:
+        analysis.execute("res_b")
+        assert False
+    except yf.ExecutorMissingTargetStepError:
+        assert True
+
+
+def test_partial_execution():
+    analysis = ComplexAnalysis()
+    analysis.execute(target_step="step_b")
+
+    # Check that only required steps were executied
+    assert "step_a" in analysis.completed_steps
+    assert "step_b" in analysis.completed_steps
+    assert "step_c" not in analysis.completed_steps
+    assert "step_d" not in analysis.completed_steps
+
+
 def test_non_dag_analysis_missing_start():
     analysis = MissingStart()
     # analysis.visualize_dependencies().render("missing_start", cleanup=True)
