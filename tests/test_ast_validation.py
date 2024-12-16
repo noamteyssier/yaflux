@@ -80,7 +80,7 @@ def test_self_assignment_nested():
         class Analysis(yf.Base):
             @yf.step(creates="some")
             def some_step(self):
-                self.some.other = 1
+                self.some.other = 1  # type: ignore
                 return 42
 
     assert exc.value.func_name == "some_step"
@@ -96,7 +96,7 @@ def test_nonself_assignment_nested():
 
         @yf.step(creates="some_other")
         def some_other_step(self):
-            some.other = 1  # noqa
+            some.other = 1  # type: ignore # noqa
             return 42
 
     # Should not raise
