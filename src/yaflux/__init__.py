@@ -1,3 +1,4 @@
+from ._ast import AstSelfMutationError, AstUndeclaredUsageError
 from ._base import Base
 from ._executor import (
     ExecutorCircularDependencyError,
@@ -29,4 +30,6 @@ __all__ = [
     "ExecutorMissingStartError",
     "ExecutorCircularDependencyError",
     "ExecutorMissingTargetStepError",
+    "AstSelfMutationError",
+    "AstUndeclaredUsageError",
 ]

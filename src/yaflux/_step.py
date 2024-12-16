@@ -3,7 +3,7 @@ import inspect
 import time
 from typing import Any, Callable, Optional, TypeVar, Union
 
-from yaflux._ast import validate_step_requirements
+from yaflux._ast import validate_ast
 from yaflux._base import Base
 from yaflux._metadata import Metadata
 from yaflux._results._lock import ResultsLock
@@ -204,7 +204,7 @@ def step(
 
     def decorator(func: Callable[..., T]) -> Callable[..., T]:
         # Validate AST before wrapping the function
-        validate_step_requirements(func, requires_list)
+        validate_ast(func, requires=requires_list)
 
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> T:
