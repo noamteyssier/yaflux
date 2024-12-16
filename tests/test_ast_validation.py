@@ -71,4 +71,33 @@ def test_self_assignment():
                 return 42
 
     assert exc.value.func_name == "some_step"
-    assert exc.value.mutated == ["some"]
+    assert exc.value.mutated == ["self.some"]
+
+
+def test_self_assignment_nested():
+    with pytest.raises(yf.AstSelfMutationError) as exc:
+
+        class Analysis(yf.Base):
+            @yf.step(creates="some")
+            def some_step(self):
+                self.some.other = 1
+                return 42
+
+    assert exc.value.func_name == "some_step"
+    assert exc.value.mutated == ["self.some.other"]
+
+
+def test_nonself_assignment_nested():
+    class Analysis(yf.Base):
+        @yf.step(creates="some")
+        def some_step(self):
+            some = 1  # noqa
+            return 42
+
+        @yf.step(creates="some_other")
+        def some_other_step(self):
+            some.other = 1  # noqa
+            return 42
+
+    # Should not raise
+    assert True
