@@ -4,6 +4,29 @@ from ._error import AstSelfMutationError
 from ._utils import get_function_node
 
 
+def _get_leftmost_name(node) -> str | None:
+    """Returns the leftmost name in an assignment node."""
+    if isinstance(node, ast.Name):
+        return node.id
+    if isinstance(node, ast.Attribute):
+        return _get_leftmost_name(node.value)
+    return None
+
+
+def _build_assignment_name(node) -> str | None:
+    """Returns the full assignment path to the leftmost name in an assignment node.
+
+    i.e.
+
+    self.attr1.attr2.attr3 = ... => self.attr1.attr2.attr3
+    """
+    if isinstance(node, ast.Name):
+        return node.id
+    if isinstance(node, ast.Attribute):
+        return _build_assignment_name(node.value) + "." + node.attr
+    return None
+
+
 class AssignmentVisitor(ast.NodeVisitor):
     """AST visitor that finds all assignments to self."""
 
@@ -12,13 +35,14 @@ class AssignmentVisitor(ast.NodeVisitor):
 
     def visit_Assign(self, node: ast.Assign) -> None:
         # Check for pattern: self.{attr} = ...
+
         if (
             len(node.targets) == 1
             and isinstance(node.targets[0], ast.Attribute)
-            and isinstance(node.targets[0].value, ast.Name)
-            and node.targets[0].value.id == "self"
+            and _get_leftmost_name(node.targets[0]) == "self"
         ):
-            self.assignees.add(node.targets[0].attr)
+            assignment_name = _build_assignment_name(node.targets[0])
+            self.assignees.add(assignment_name)
 
 
 def validate_no_self_assignment(func) -> None:
