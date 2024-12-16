@@ -3,7 +3,11 @@ from itertools import chain
 from typing import Any, Optional, TypeVar
 
 from .._base import Base
-from ._error import ExecutorCircularDependencyError, ExecutorMissingStartError
+from ._error import (
+    ExecutorCircularDependencyError,
+    ExecutorMissingStartError,
+    ExecutorMissingTargetStepError,
+)
 
 T = TypeVar("T", bound="Base")
 
@@ -100,7 +104,9 @@ class Executor:
         # If target specified, trim execution order to that step
         if target_step:
             if target_step not in execution_order:
-                raise ValueError(f"Step {target_step} not found in analysis")
+                raise ExecutorMissingTargetStepError(
+                    f"Step {target_step} not found in analysis"
+                )
             target_idx = execution_order.index(target_step)
             execution_order = execution_order[: target_idx + 1]
 

@@ -2,6 +2,7 @@ from ._base import Base
 from ._executor import (
     ExecutorCircularDependencyError,
     ExecutorMissingStartError,
+    ExecutorMissingTargetStepError,
 )
 from ._loaders import load
 from ._results import FlagError, UnauthorizedMutationError
@@ -27,4 +28,5 @@ __all__ = [
     "YaxNotArchiveFileError",
     "ExecutorMissingStartError",
     "ExecutorCircularDependencyError",
+    "ExecutorMissingTargetStepError",
 ]
