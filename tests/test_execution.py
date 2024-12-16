@@ -94,6 +94,31 @@ def test_partial_execution():
     assert "step_d" not in analysis.completed_steps
 
 
+def test_diamond_dependencies():
+    """Test handling of diamond-shaped dependency patterns"""
+
+    class DiamondAnalysis(yf.Base):
+        @yf.step(creates="root")
+        def root(self) -> int:
+            return 1
+
+        @yf.step(creates="left", requires="root")
+        def left_path(self) -> int:
+            return self.results.root * 2
+
+        @yf.step(creates="right", requires="root")
+        def right_path(self) -> int:
+            return self.results.root * 3
+
+        @yf.step(creates="merged", requires=["left", "right"])
+        def merge(self) -> int:
+            return self.results.left + self.results.right
+
+    analysis = DiamondAnalysis()
+    analysis.execute_all()
+    assert analysis.results.merged == 5
+
+
 def test_non_dag_analysis_missing_start():
     analysis = MissingStart()
     # analysis.visualize_dependencies().render("missing_start", cleanup=True)
