@@ -48,15 +48,11 @@ class MyAnalysis(yf.Base):
     def workflow_step_c(self) -> list[int]:
         return [i + j for i in self.results.raw_data for j in self.results.processed_data]
 
-    # Define a complete workflow however you'd like
-    def run(self):
-        self.workflow_step_a()
-        self.workflow_step_b()
-        self.workflow_step_c()
-
-# Define and run an analysis
+# Initialize the analysis
 analysis = MyAnalysis()
-analysis.run()
+
+# Yaflux will infer the correct order of execution
+analysis.execute_all()
 
 # Access results
 final = analysis.results.final_data
@@ -132,8 +128,7 @@ As we run the analysis, we can fill in the dependency graph and see where we are
 
 ```python
 analysis.load_data()
-analysis.process_x()
-analysis.process_y()
+analysis.execute(target_step="process_y") # Run up to `process_y`
 
 # Visualize the updated dependencies
 analysis.visualize_dependencies()
