@@ -58,10 +58,14 @@ It takes the following arguments:
 
 1. `creates`: The name of the result(s) created by the step (if any)
 2. `requires`: The name(s) of the result(s) required by the step (if any)
+3. `mutates`: The names(s) of the result(s) that are mutated by the step (if any)
 
 The `creates` and `requires` arguments allow you to specify the inputs and outputs of each step.
+The `mutates` argument allows you to specify which results are mutated in place by the step.
 
 The decorated method should return the result(s) of the step.
+
+**Note**: The `mutates` argument implies a `requires` dependency. If a step mutates a result, it implicitly requires that result. If you include a variable in the `mutates` you do not need to include it in the `requires`.
 
 #### Mutability
 
@@ -69,6 +73,71 @@ Note that in the above example **no step mutates the analysis object**.
 
 The `step` decorator ensures that the results of each step are properly stored and tracked by the analysis object.
 This is an attempt to limit the potential for side effects and to make the analysis more reproducible.
+
+There are cases however where you may need to mutate the internal state of specific results for efficiency reasons.
+In these cases you can use the `mutates` argument to specify which results are mutated in place.
+
+```python
+import yaflux as yf
+
+class MyAnalysis(yf.Base):
+
+    @yf.step(creates="raw_data")
+    def workflow_step_a(self) -> list[int]:
+        return [i for i in range(10)]
+
+    # Mutating the raw_data in place
+    @yf.step(mutates="raw_data", creates="_mutated_data")
+    def workflow_step_b(self) -> list[int]:
+        for idx in range(len(self.results.raw_data)):
+            self.results.raw_data[idx] = self.results.raw_data[idx] * 2
+
+    @yf.step(creates="final_data", requires=["raw_data", "_mutated_data"])
+    def workflow_step_c(self) -> int:
+        return sum(self.results.raw_data)
+
+analysis = MyAnalysis()
+analysis.execute()
+assert analysis.results.final_data == 90
+```
+
+An important thing to note is that direct mutations break the implicit DAG structure of the analysis.
+The way that `yaflux` reinforces the DAG structure of the analysis is by not allowing steps at the same topological level to have any overlap between mutated and required depdendencies.
+
+Take the following example:
+
+```python
+import yaflux as yf
+
+class MyAnalysis(yf.Base):
+
+    @yf.step(creates="raw_data")
+    def workflow_step_a(self) -> int:
+        return 10
+
+    @yf.step(mutates="raw_data")
+    def workflow_step_b(self):
+        self.results.raw_data = 20
+
+    @yf.step(mutates="raw_data")
+    def workflow_step_c(self):
+        self.results.raw_data = 30
+
+    @yf.step(creates="final_data", requires="raw_data")
+    def workflow_step_d(self) -> int:
+        return self.results.raw_data + 10
+
+try:
+    MyAnalysis()
+except yf.MutabilityConflictError as e:
+    print(e)
+```
+
+Because `workflow_step_b` and `workflow_step_c` both mutate `raw_data` and `workflow_step_d` requires `raw_data` this will raise a `MutabilityConflictError`.
+The problem is that the `final_data` will change depending on the order of execution of `workflow_step_b` and `workflow_step_c`.
+This is a problem because `yaflux` assumes that the order of execution of steps at the same topological level does not matter.
+
+To fix this problem you can use flags to signify that a step has been run.
 
 #### Flag Setting
 
@@ -89,7 +158,7 @@ class MyAnalysis(yf.Base):
         return [i for i in range(10)]
 
     # Flag setting is specified with a leading underscore
-    @yf.step(creates="_mut_data", requires="raw_data")
+    @yf.step(creates="_mut_data", mutates="raw_data")
     def workflow_step_b(self) -> list[int]:
         for idx in range(len(self.results.raw_data)):
             if idx % 2 == 0:
@@ -129,6 +198,33 @@ class MyAnalysis(yf.Base):
 analysis = MyAnalysis()
 analysis.workflow_step_a()
 analysis.workflow_step_b() # will fail
+```
+
+Lets look at an example where we use flags to disambiguate the order of execution of steps:
+
+```python
+import yaflux as yf
+
+class MyAnalysis(yf.Base):
+
+    @yf.step(creates="raw_data")
+    def workflow_step_a(self) -> int:
+        return 10
+
+    @yf.step(mutates="raw_data", creates="_flag_b")
+    def workflow_step_b(self):
+        self.results.raw_data = 20
+
+    @yf.step(mutates="raw_data", creates="_flag_c", requires="_flag_b")
+    def workflow_step_c(self):
+        self.results.raw_data = 30
+
+    @yf.step(creates="final_data", requires=["raw_data", "_flag_b", "_flag_c"])
+    def workflow_step_d(self) -> int:
+        return self.results.raw_data + 10
+
+analysis = MyAnalysis()
+analysis.execute()
 ```
 
 ## Executing an Analysis
