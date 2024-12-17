@@ -10,7 +10,7 @@ class ResultsAttributeVisitor(ast.NodeVisitor):
     def __init__(self):
         self.accessed_attrs: set[str] = set()
 
-    def visit_Attribute(self, node: ast.Attribute) -> None: # noqa: N802
+    def visit_Attribute(self, node: ast.Attribute) -> None:  # noqa: N802
         """Visit attribute access nodes in the AST."""
         # Check for pattern: self.results.{attr}
         if (
