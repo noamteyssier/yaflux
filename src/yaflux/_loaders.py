@@ -46,7 +46,7 @@ def load(
 
     else:
         raise YaxNotArchiveFileError(
-            "The provided file is not a yax archive. Please provide a valid yax archive."
+            "Provided file is not a yax archive. Please provide a valid yax archive."
         )
 
 
