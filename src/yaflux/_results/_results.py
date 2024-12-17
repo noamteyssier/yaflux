@@ -34,11 +34,12 @@ class Results:
             raise AttributeError(f"No result named '{name}' exists") from exc
 
     def __delattr__(self, name: str) -> None:
-        if not ResultsLock.can_mutate():
+        if not ResultsLock.can_mutate_key(name):
             raise UnauthorizedMutationError(
-                "Results can only be modified within a step decorator"
+                f"Results key '{name}' cannot be modified outside of the current context"
             )
-        if name == "_data":
+
+        if name == "_data" or name == "_metadata":
             raise AttributeError(f"Cannot delete attribute '{name}'")
 
         if not FlagLock.can_mutate():
@@ -50,18 +51,23 @@ class Results:
             raise AttributeError(f"No result named '{name}' exists") from exc
 
     def __setattr__(self, name, value):
-        if not ResultsLock.can_mutate():
+        if not ResultsLock.can_mutate_key(name):
             raise UnauthorizedMutationError(
-                "Results can only be modified within a step decorator"
+                f"Results key '{name}' cannot be modified outside of the current context"
             )
-        if name == "_data":
+        if name == "_data" or name == "_metadata":
+            if not ResultsLock.can_mutate():
+                raise UnauthorizedMutationError(
+                    f"Cannot modify '{name}' attribute outside of the current context"
+                )
             object.__setattr__(self, name, value)
+            return
 
         if not FlagLock.can_mutate():
             if name.startswith("_") and hasattr(self, name) and name != "_data":
                 raise FlagError(f"Cannot modify flag once set: {name}")
-        else:
-            self._data[name] = value
+
+        self._data[name] = value
 
     def __dir__(self):
         return list(self._data.keys())

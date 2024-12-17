@@ -5,6 +5,7 @@ from ._executor import (
     ExecutorMissingStartError,
     ExecutorMissingTargetStepError,
 )
+from ._graph import CircularDependencyError, MutabilityConflictError
 from ._loaders import load
 from ._results import FlagError, UnauthorizedMutationError
 from ._step import step
@@ -32,4 +33,6 @@ __all__ = [
     "ExecutorMissingTargetStepError",
     "AstSelfMutationError",
     "AstUndeclaredUsageError",
+    "CircularDependencyError",
+    "MutabilityConflictError",
 ]

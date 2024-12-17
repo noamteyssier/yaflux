@@ -1,8 +1,8 @@
 from collections import deque
-from itertools import chain
 from typing import Any, Optional
 
 from .._base import Base
+from .._graph import build_read_graph
 from ._error import (
     ExecutorCircularDependencyError,
     ExecutorMissingStartError,
@@ -16,45 +16,13 @@ class Executor:
     def __init__(self, analysis: "Base"):
         self._analysis = analysis
 
-    def _get_dependency_graph(self) -> dict[str, set[str]]:
-        """Build adjacency list of step dependencies.
-
-        Graph is indexed by step name with values as sets of dependent steps.
-        """
-        graph = {}
-
-        # Precompute method dependencies
-        method_requires = dict()
-        method_creates = dict()
-        for step_name in self._analysis.available_steps:
-            method = getattr(self._analysis.__class__, step_name)
-            method_creates[step_name] = set(
-                [req for req in chain(method.creates, method.creates_flags)]
-            )
-            method_requires[step_name] = set(
-                [req for req in chain(method.requires, method.requires_flags)]
-            )
-
-        # Build graph
-        for step_name in self._analysis.available_steps:
-            graph[step_name] = set()
-
-            # Add edges for result dependencies
-            for req in method_requires[step_name]:
-                for potential_step in self._analysis.available_steps:
-                    create_set = method_creates[potential_step]
-                    if req in create_set:
-                        graph[step_name].add(potential_step)
-
-        return graph
-
     def _calculate_indegrees(self, graph: dict[str, set[str]]) -> dict[str, int]:
         """Calculate the indegree of each step in the dependency graph."""
         return {step: len(graph[step]) for step in graph}
 
     def _get_execution_order(self) -> list[str]:
         """Determine the order of step execution using topological sort."""
-        graph = self._get_dependency_graph()
+        graph = build_read_graph(self._analysis)
         indegrees = self._calculate_indegrees(graph)
 
         # Start with steps that have no dependencies

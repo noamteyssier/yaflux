@@ -34,9 +34,8 @@ class Base:
         self._step_ordering = []  # Hidden attribute to store the order of performed steps
         self.parameters = parameters
 
-        from ._executor import Executor  # Avoid circular import
-
-        self._executor = Executor(self)
+        self._validate_dependency_graph()
+        self._load_executor()
 
     @property
     def results(self) -> Results:
@@ -156,6 +155,90 @@ class Base:
         return load(
             filepath, cls, no_results=no_results, select=select, exclude=exclude
         )
+
+    def _build_read_graph(self) -> dict[str, set[str]]:
+        """Builds the dependency graph of all steps in the analysis.
+
+        This method builds a graph of all steps in the analysis and their dependencies.
+        Dependencies are determined by union of `requires` and `mutates` attributes of each step.
+        This also includes flags.
+
+        Returns
+        -------
+        dict[str, set[str]]
+            The dependency graph as a dictionary of sets.
+        """
+        from ._graph import build_read_graph  # avoid circular import
+
+        return build_read_graph(self)
+
+    def _build_write_graph(self) -> dict[str, set[str]]:
+        """Builds the dependency graph of all steps in the analysis limited to mutations.
+
+        This method builds a graph of all steps in the analysis and their dependencies.
+        Dependencies are determined by the `mutates` attribute of each step.
+        This does not include flags or read-only dependencies.
+
+        Returns
+        -------
+        dict[str, set[str]]
+            The dependency graph as a dictionary of sets.
+        """
+        from ._graph import build_write_graph  # avoid circular import
+
+        return build_write_graph(self)
+
+    def _compute_topological_levels(self, graph):
+        """Calculate the topological levels of the dependency graph.
+
+        Input should be a graph of read dependencies (which includes write dependencies).
+
+        Parameters
+        ----------
+        graph : dict[str, set[str]]
+            The dependency graph as a dictionary of sets.
+
+        Returns
+        -------
+        dict[str, int]
+            A dictionary of step names and their topological levels.
+        """
+        from ._graph import compute_topological_levels
+
+        return compute_topological_levels(graph)
+
+    def _validate_incompatible_mutability(self, graph, wgraph, levels):
+        """Validate the dependency graph for mutation conflicts.
+
+        Raises
+        ------
+        ValueError
+            If mutation conflicts are detected between steps at the same level
+        """
+        from ._graph import validate_incompatible_mutability
+
+        validate_incompatible_mutability(graph, wgraph, levels)
+
+    def _validate_dependency_graph(self):
+        """Validate the dependency graph for mutation conflicts and circular dependencies.
+
+        Raises
+        ------
+        yaflux.graph.CircularDependencyError
+            If a circular dependency is detected in the graph
+        yaflux.graph.MutabilityConflictError
+            If a mutation conflict is detected in the graph
+        """
+        graph = self._build_read_graph()
+        wgraph = self._build_write_graph()
+        levels = self._compute_topological_levels(graph)
+        self._validate_incompatible_mutability(graph, wgraph, levels)
+
+    def _load_executor(self):
+        """Load the executor engine for the analysis."""
+        from ._executor import Executor  # Avoid circular import
+
+        self._executor = Executor(self)
 
     def visualize_dependencies(self, *args, **kwargs):
         """Create a visualization of step dependencies.

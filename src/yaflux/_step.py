@@ -36,9 +36,12 @@ def _validate_instance_method(args: tuple) -> tuple[Base, tuple]:
     return args[0], args[1:]
 
 
-def _check_requirements(analysis: Base, requires: list[str]) -> None:
+def _check_requirements(
+    analysis: Base, requires: list[str], mutates: list[str]
+) -> None:
     """Validate that all required results exist."""
-    missing = [req for req in requires if not hasattr(analysis._results, req)]
+    all_requirements = requires + mutates
+    missing = [req for req in all_requirements if not hasattr(analysis._results, req)]
     if missing:
         raise ValueError(
             f"Missing required results: {missing}. Run required steps first."
@@ -173,8 +176,9 @@ def _filter_valid_kwargs(func: Callable, kwargs: dict) -> dict:
 
 
 def step(
-    creates: Optional[Union[list[str], str]] = None,
-    requires: Optional[Union[list[str], str]] = None,
+    creates: list[str] | str | None = None,
+    requires: list[str] | str | None = None,
+    mutates: list[str] | str | None = None,
 ) -> Callable:
     """Decorator to register analysis steps and their results.
 
@@ -184,6 +188,8 @@ def step(
         Names of the results this step creates
     requires : str | list[str] | None
         Names of the results this step requires
+    mutates: str | list[str] | None
+        Names of the results this step mutates
 
     Attributes
     ----------
@@ -191,6 +197,8 @@ def step(
         Names of the results this step creates
     requires : list[str]
         Names of the results this step requires
+    mutates: list[str]
+        Names of the results this step mutates
     creates_flags : list[str]
         Names of the flags this step creates
     requires_flags : list[str]
@@ -198,13 +206,14 @@ def step(
     """
     creates_list = _normalize_list(creates)
     requires_list = _normalize_list(requires)
+    mutates_list = _normalize_list(mutates)
 
     creates_list, creates_flags = _pull_flags(creates_list)
     requires_list, requires_flags = _pull_flags(requires_list)
 
     def decorator(func: Callable[..., T]) -> Callable[..., T]:
         # Validate AST before wrapping the function
-        validate_ast(func, requires=requires_list)
+        validate_ast(func, requires=requires_list, mutates=mutates_list)
 
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> T:
@@ -217,7 +226,7 @@ def step(
 
             # Setup and validation
             analysis_obj, remaining_args = _validate_instance_method(args)
-            _check_requirements(analysis_obj, requires_list)
+            _check_requirements(analysis_obj, requires_list, mutates_list)
             _check_required_flags(analysis_obj, requires_flags)
 
             # Handle existing results
@@ -230,14 +239,18 @@ def step(
             # Filter valid kwargs
             valid_kwargs = _filter_valid_kwargs(func, kwargs)
 
-            # Timestamp the start of the step
-            start_time = time.time()
+            # Setup mutable context
+            mutable_keys = set(mutates_list) if mutates_list else None
 
-            # Execute the function
-            result = func(analysis_obj, *remaining_args, **valid_kwargs)
+            with ResultsLock.allow_mutation(mutable_keys):
+                # Timestamp the start of the step
+                start_time = time.time()
 
-            # Record the elapsed time
-            elapsed = time.time() - start_time
+                # Execute the function
+                result = func(analysis_obj, *remaining_args, **valid_kwargs)
+
+                # Record the elapsed time
+                elapsed = time.time() - start_time
 
             # Build the metadata object
             step_metadata = Metadata(
@@ -273,6 +286,7 @@ def step(
         wrapper.requires = requires_list  # type: ignore
         wrapper.creates_flags = creates_flags  # type: ignore
         wrapper.requires_flags = requires_flags  # type: ignore
+        wrapper.mutates = mutates_list  # type: ignore
         return wrapper
 
     return decorator

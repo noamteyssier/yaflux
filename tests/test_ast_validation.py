@@ -101,3 +101,51 @@ def test_nonself_assignment_nested():
 
     # Should not raise
     assert True
+
+
+def test_accepted_mutability():
+    class Analysis(yf.Base):
+        @yf.step(creates="some")
+        def some_step(self):
+            return 42
+
+        @yf.step(mutates="some")
+        def some_other_step(self):
+            self.results.some = 1
+
+    assert True
+
+
+def test_illegal_mutability():
+    with pytest.raises(yf.AstSelfMutationError) as exc:
+
+        class Analysis(yf.Base):
+            @yf.step(creates="some")
+            def some_step(self):
+                return 42
+
+            @yf.step(mutates="some")
+            def some_other_step(self):
+                _ = self.results.some  # to ignore warning
+                self.some = 1
+
+    assert exc.value.func_name == "some_other_step"
+    assert exc.value.mutated == ["self.some"]
+
+
+def test_rejected_mutability():
+    with pytest.raises(yf.AstSelfMutationError) as exc:
+
+        class Analysis(yf.Base):
+            @yf.step(creates="some")
+            def some_step(self):
+                return 42
+
+            @yf.step(mutates="some", requires="other")
+            def some_other_step(self):
+                _ = self.results.other
+                _ = self.results.some
+                self.results.other = 1
+
+    assert exc.value.func_name == "some_other_step"
+    assert exc.value.mutated == ["self.results.other"]
