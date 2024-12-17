@@ -17,7 +17,7 @@ from ._toml import _format_toml_section
 class TarfileSerializer:
     """Handles serialization of analysis objects to/from yaflux archive format."""
 
-    VERSION = "0.2.0"
+    VERSION = "0.2.1"
     METADATA_NAME = "metadata.pkl"
     MANIFEST_NAME = "manifest.toml"
     RESULTS_DIR = "results"
