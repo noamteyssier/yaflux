@@ -134,10 +134,10 @@ def _store_results(
             _store_singular_result(analysis, creates, result)
         except (
             AttributeError
-        ):  # Case where the dictionary has a superset of keys not in the creates list
+        ) as exc:  # Case where the dictionary has a superset of keys not in `creates`
             raise ValueError(
                 "Unambiguous result keys in dictionary (superset of creates list)"
-            )
+            ) from exc
 
     # If the result is a tuple, unpack it into the results object
     elif isinstance(result, tuple):
