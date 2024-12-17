@@ -34,16 +34,8 @@ class Base:
         self._step_ordering = []  # Hidden attribute to store the order of performed steps
         self.parameters = parameters
 
-        self._read_graph = self._build_read_graph()
-        self._write_graph = self._build_write_graph()
-        self._levels = self._compute_topological_levels(self._read_graph)
-        self._validate_incompatible_mutability(
-            self._read_graph, self._write_graph, self._levels
-        )
-
-        from ._executor import Executor  # Avoid circular import
-
-        self._executor = Executor(self)
+        self._validate_dependency_graph()
+        self._load_executor()
 
     @property
     def results(self) -> Results:
@@ -226,6 +218,27 @@ class Base:
         from ._graph import validate_incompatible_mutability
 
         validate_incompatible_mutability(graph, wgraph, levels)
+
+    def _validate_dependency_graph(self):
+        """Validate the dependency graph for mutation conflicts and circular dependencies.
+
+        Raises
+        ------
+        yaflux.graph.CircularDependencyError
+            If a circular dependency is detected in the graph
+        yaflux.graph.MutabilityConflictError
+            If a mutation conflict is detected in the graph
+        """
+        graph = self._build_read_graph()
+        wgraph = self._build_write_graph()
+        levels = self._compute_topological_levels(graph)
+        self._validate_incompatible_mutability(graph, wgraph, levels)
+
+    def _load_executor(self):
+        """Load the executor engine for the analysis."""
+        from ._executor import Executor  # Avoid circular import
+
+        self._executor = Executor(self)
 
     def visualize_dependencies(self, *args, **kwargs):
         """Create a visualization of step dependencies.
