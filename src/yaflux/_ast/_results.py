@@ -91,8 +91,8 @@ def validate_step_requirements(func, requires: list[str]) -> None:
         import warnings
 
         warnings.warn(
-            "The following required attributes are never accessed in ",
-            f"{func_name}: {unused}. ",
-            "Consider removing them from the 'requires' parameter.",
+            "The following required attributes are never accessed in "
+            + f"{func_name}: {unused}. "
+            + "Consider removing them from the 'requires' parameter.",
             stacklevel=2,
         )
