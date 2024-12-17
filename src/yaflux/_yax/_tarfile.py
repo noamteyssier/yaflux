@@ -22,6 +22,7 @@ class TarfileSerializer:
     MANIFEST_NAME = "manifest.toml"
     RESULTS_DIR = "results"
     EXTENSION = ".yax"  # yaflux archive extension
+    COMPRESSED_EXTENSION = ".yax.gz"  # compressed yaflux archive extension
 
     @classmethod
     def _create_manifest(cls, metadata: dict, results: dict) -> str:
@@ -89,14 +90,15 @@ class TarfileSerializer:
         compress : bool, optional
             Whether to compress the archive (gzip), by default False
         """
-        # Ensure correct extension
-        if compress:
-            if not filepath.endswith(cls.EXTENSION + ".gz"):
-                filepath = filepath + cls.EXTENSION + ".gz"
-            if filepath.endswith(cls.EXTENSION):
-                filepath = filepath + ".gz"
-        else:
-            if not filepath.endswith(cls.EXTENSION):
+        # Ensure correct file extension
+        if filepath.endswith(cls.EXTENSION) and compress:
+            filepath = filepath.replace(cls.EXTENSION, cls.COMPRESSED_EXTENSION)
+        elif filepath.endswith(cls.COMPRESSED_EXTENSION):
+            compress = True
+        elif not filepath.endswith(cls.EXTENSION):
+            if compress:
+                filepath = filepath + cls.COMPRESSED_EXTENSION
+            else:
                 filepath = filepath + cls.EXTENSION
 
         if not force and os.path.exists(filepath):
@@ -231,7 +233,10 @@ class TarfileSerializer:
     @classmethod
     def is_yaflux_archive(cls, filepath: str) -> bool:
         """Check if file is a yaflux archive."""
-        return filepath.endswith(cls.EXTENSION) and tarfile.is_tarfile(filepath)
+        return (
+            filepath.endswith(cls.EXTENSION)
+            or filepath.endswith(cls.COMPRESSED_EXTENSION)
+        ) and tarfile.is_tarfile(filepath)
 
     @staticmethod
     def _normalize_input(options: list[str] | str | None) -> list[str] | None:
