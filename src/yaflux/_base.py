@@ -220,7 +220,7 @@ class Base:
         validate_incompatible_mutability(graph, wgraph, levels)
 
     def _validate_dependency_graph(self):
-        """Validate the dependency graph for mutation conflicts and circular dependencies.
+        """Validate the dependency graph for mutation conflicts & circular dependencies.
 
         Raises
         ------
