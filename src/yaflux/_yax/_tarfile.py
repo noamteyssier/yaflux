@@ -189,6 +189,8 @@ class TarfileSerializer:
         """Read parameters from the archive."""
         try:
             parameters_file = tar.extractfile("parameters.pkl")
+            if parameters_file is None:
+                return None
             return pickle.loads(parameters_file.read())
         except KeyError:
             return None
