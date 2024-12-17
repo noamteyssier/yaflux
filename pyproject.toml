@@ -34,3 +34,26 @@ dev = [
     { include-group = "type-checking" },
     { include-group = "docs" },
 ]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle
+    "F",   # flake8
+    "W",   # pyflakes
+    "C90", # complexity
+    "I",   # isort
+    "N",   # naming
+    "B",   # bugbear
+    "D",   # docstring
+    "UP",  # pyupgrade
+    "RUF", # ruff-specific
+    "SIM", # simplify
+]
+ignore = [
+    "D100", # undocumented-public-module
+    "D104", # undocumented-public-package
+    "D105", # undocumented-magic-method
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
