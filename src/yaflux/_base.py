@@ -34,6 +34,13 @@ class Base:
         self._step_ordering = []  # Hidden attribute to store the order of performed steps
         self.parameters = parameters
 
+        self._read_graph = self._build_read_graph()
+        self._write_graph = self._build_write_graph()
+        self._levels = self._compute_topological_levels(self._read_graph)
+        self._validate_incompatible_mutability(
+            self._read_graph, self._write_graph, self._levels
+        )
+
         from ._executor import Executor  # Avoid circular import
 
         self._executor = Executor(self)
@@ -156,6 +163,69 @@ class Base:
         return load(
             filepath, cls, no_results=no_results, select=select, exclude=exclude
         )
+
+    def _build_read_graph(self) -> dict[str, set[str]]:
+        """Builds the dependency graph of all steps in the analysis.
+
+        This method builds a graph of all steps in the analysis and their dependencies.
+        Dependencies are determined by union of `requires` and `mutates` attributes of each step.
+        This also includes flags.
+
+        Returns
+        -------
+        dict[str, set[str]]
+            The dependency graph as a dictionary of sets.
+        """
+        from ._graph import build_read_graph  # avoid circular import
+
+        return build_read_graph(self)
+
+    def _build_write_graph(self) -> dict[str, set[str]]:
+        """Builds the dependency graph of all steps in the analysis limited to mutations.
+
+        This method builds a graph of all steps in the analysis and their dependencies.
+        Dependencies are determined by the `mutates` attribute of each step.
+        This does not include flags or read-only dependencies.
+
+        Returns
+        -------
+        dict[str, set[str]]
+            The dependency graph as a dictionary of sets.
+        """
+        from ._graph import build_write_graph  # avoid circular import
+
+        return build_write_graph(self)
+
+    def _compute_topological_levels(self, graph):
+        """Calculate the topological levels of the dependency graph.
+
+        Input should be a graph of read dependencies (which includes write dependencies).
+
+        Parameters
+        ----------
+        graph : dict[str, set[str]]
+            The dependency graph as a dictionary of sets.
+
+        Returns
+        -------
+        dict[str, int]
+            A dictionary of step names and their topological levels.
+        """
+        from ._graph import compute_topological_levels
+
+        return compute_topological_levels(graph)
+
+    def _validate_incompatible_mutability(self, graph, wgraph, levels):
+        """Validate the dependency graph for mutation conflicts.
+
+        Raises
+        ------
+        ValueError
+            If mutation conflicts are detected between steps at the same level
+        """
+        from ._graph import validate_incompatible_mutability
+
+        validate_incompatible_mutability(graph, wgraph, levels)
 
     def visualize_dependencies(self, *args, **kwargs):
         """Create a visualization of step dependencies.
