@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from ._metadata import Metadata
 from ._results import Results, ResultsLock
@@ -27,11 +27,11 @@ class Base:
         List all completed steps for the analysis.
     """
 
-    def __init__(self, parameters: Optional[Any] = None):
+    def __init__(self, parameters: Any | None = None):
         with ResultsLock.allow_mutation():  # Unlock during initialization
             self._results = Results()
         self._completed_steps = set()
-        self._step_ordering = []  # Hidden attribute to store the order of performed steps
+        self._step_ordering = []  # Hidden attribute to store the order of steps
         self.parameters = parameters
 
         self._validate_dependency_graph()
@@ -131,7 +131,7 @@ class Base:
         Parameters
         ----------
         filepath : str
-            Path to the analysis file. If it ends in .yax, loads using yaflux archive format.
+            Path to the analysis file. If .yax, load using yaflux archive format.
             Otherwise attempts to load as legacy pickle format.
         no_results : bool, optional
             Only load metadata (yaflux archive format only), by default False
@@ -157,10 +157,10 @@ class Base:
         )
 
     def _build_read_graph(self) -> dict[str, set[str]]:
-        """Builds the dependency graph of all steps in the analysis.
+        """Build the dependency graph of all steps in the analysis.
 
         This method builds a graph of all steps in the analysis and their dependencies.
-        Dependencies are determined by union of `requires` and `mutates` attributes of each step.
+        Dependencies are determined by union of `requires` and `mutates` attributes.
         This also includes flags.
 
         Returns
@@ -173,7 +173,7 @@ class Base:
         return build_read_graph(self)
 
     def _build_write_graph(self) -> dict[str, set[str]]:
-        """Builds the dependency graph of all steps in the analysis limited to mutations.
+        """Build the dependency graph of all steps in the analysis limited to mutations.
 
         This method builds a graph of all steps in the analysis and their dependencies.
         Dependencies are determined by the `mutates` attribute of each step.
@@ -191,7 +191,7 @@ class Base:
     def _compute_topological_levels(self, graph):
         """Calculate the topological levels of the dependency graph.
 
-        Input should be a graph of read dependencies (which includes write dependencies).
+        Input is a graph of read dependencies (which includes write dependencies).
 
         Parameters
         ----------
@@ -220,7 +220,7 @@ class Base:
         validate_incompatible_mutability(graph, wgraph, levels)
 
     def _validate_dependency_graph(self):
-        """Validate the dependency graph for mutation conflicts and circular dependencies.
+        """Validate the dependency graph for mutation conflicts & circular dependencies.
 
         Raises
         ------
@@ -250,7 +250,8 @@ class Base:
         pip install yaflux[viz]
         ```
 
-        Raises:
+        Raises
+        ------
             ImportError: If graphviz is not installed.
         """
         raise ImportError(
@@ -260,7 +261,7 @@ class Base:
 
     def execute(
         self,
-        target_step: Optional[str] = None,
+        target_step: str | None = None,
         force: bool = False,
         panic_on_existing: bool = False,
     ) -> Any:

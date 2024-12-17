@@ -1,6 +1,6 @@
 [project]
 name = "yaflux"
-version = "0.2.3"
+version = "0.2.4"
 description = "A lightweight, declarative framework for python analysis workflows."
 readme = "README.md"
 authors = [
@@ -33,4 +33,32 @@ dev = [
     { include-group = "linting" },
     { include-group = "type-checking" },
     { include-group = "docs" },
+]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle
+    "F",   # flake8
+    "W",   # pyflakes
+    "C90", # complexity
+    "I",   # isort
+    "N",   # naming
+    "B",   # bugbear
+    "D",   # docstring
+    "UP",  # pyupgrade
+    "RUF", # ruff-specific
+    "SIM", # simplify
+]
+ignore = [
+    "D100", # undocumented-public-module
+    "D104", # undocumented-public-package
+    "D105", # undocumented-magic-method
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+    "D", # docstring
 ]

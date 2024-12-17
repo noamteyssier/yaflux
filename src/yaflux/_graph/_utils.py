@@ -15,7 +15,6 @@ def build_read_graph(analysis: Base) -> dict[str, set[str]]:
         Graph indexed by step name with values as sets of dependent step names.
         An edge A -> B means step A depends on step B.
     """
-
     graph = {}
 
     # Map results/flags to the steps that create them
@@ -52,7 +51,6 @@ def build_write_graph(analysis: Base) -> dict[str, set[str]]:
         Graph indexed by step name with values as sets of dependent step names.
         An edge A -> B means step A depends on step B.
     """
-
     graph = {}
     creates_map = {}
     for step_name in analysis.available_steps:
@@ -102,11 +100,7 @@ def compute_topological_levels(graph: dict[str, set[str]]) -> dict[str, int]:
         visited.add(node)
 
         # Compute level as 1 + max level of dependencies
-        if not graph[node]:
-            level = 0
-        else:
-            level = 1 + max(visit(dep) for dep in graph[node])
-
+        level = 0 if not graph[node] else 1 + max(visit(dep) for dep in graph[node])
         levels[node] = level
         visited.remove(node)
         return level

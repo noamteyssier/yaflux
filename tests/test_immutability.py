@@ -16,7 +16,7 @@ def test_immutable_append():
     analysis = Analysis()
     try:
         analysis._results["res_a"] = 42  # type: ignore
-        assert False
+        raise AssertionError()
     except TypeError:
         pass
 
@@ -25,7 +25,7 @@ def test_immutable_setter():
     analysis = Analysis()
     try:
         analysis.results["res_a"] = 42  # type: ignore
-        assert False
+        raise AssertionError()
     except TypeError:
         pass
 
@@ -35,7 +35,7 @@ def test_immutable_modify():
     analysis.step_a()
     try:
         analysis.results["res_a"] = 43  # type: ignore
-        assert False
+        raise AssertionError()
     except TypeError:
         pass
 
@@ -45,7 +45,7 @@ def test_immutable_del():
     analysis.step_a()
     try:
         del analysis.results["res_a"]  # type: ignore
-        assert False
+        raise AssertionError()
     except TypeError:
         pass
 
@@ -54,6 +54,6 @@ def test_immutable_overwrite():
     analysis = Analysis()
     try:
         analysis._results = Results()
-        assert False
+        raise AssertionError()
     except UnauthorizedMutationError:
         pass

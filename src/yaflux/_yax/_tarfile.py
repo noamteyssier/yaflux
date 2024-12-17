@@ -3,7 +3,7 @@ import pickle
 import tarfile
 from datetime import datetime
 from io import BytesIO
-from typing import Any, Dict, List
+from typing import Any
 
 from ._error import (
     YaxMissingParametersFileError,
@@ -78,7 +78,8 @@ class TarfileSerializer:
         Parameters
         ----------
         filepath : str
-            Path to save the analysis. If it doesn't end in .yax, the extension will be added
+            Path to save the analysis. If it doesn't end in .yax, the extension will
+            be added
         analysis : Any
             Analysis object to save
         force : bool, optional
@@ -132,14 +133,14 @@ class TarfileSerializer:
                 tar.addfile(result_info, result_bytes)
 
     @classmethod
-    def load(
+    def load(  # noqa: C901
         cls,
         filepath: str,
         *,
         no_results: bool = False,
-        select: List[str] | str | None = None,
-        exclude: List[str] | str | None = None,
-    ) -> tuple[Dict[str, Any], Dict[str, Any]]:
+        select: list[str] | str | None = None,
+        exclude: list[str] | str | None = None,
+    ) -> tuple[dict[str, Any], dict[str, Any]]:
         """Load analysis from yaflux archive format.
 
         Parameters

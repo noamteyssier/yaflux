@@ -16,7 +16,12 @@ class MyAnalysis(yf.Base):
 
     @yf.step(creates="final_data", requires=["base_data", "mixin_data"])
     def final_process(self) -> list[int]:
-        return [x + y for x, y in zip(self.results.base_data, self.results.mixin_data)]
+        return [
+            x + y
+            for x, y in zip(
+                self.results.base_data, self.results.mixin_data, strict=False
+            )
+        ]
 
 
 def run_and_save(path: str):
@@ -81,7 +86,7 @@ def test_selective_loading_select_non_existent():
     run_and_save(TMP_PATH)
     try:
         MyAnalysis.load(TMP_PATH, select="non_existent")
-        assert False
+        raise AssertionError()
     except yf.YaxMissingResultError:
         assert True
     delete_tmp(TMP_PATH)
@@ -91,7 +96,7 @@ def test_selective_loading_select_non_existent_list():
     run_and_save(TMP_PATH)
     try:
         MyAnalysis.load(TMP_PATH, select=["non_existent"])
-        assert False
+        raise AssertionError()
     except yf.YaxMissingResultError:
         assert True
     delete_tmp(TMP_PATH)

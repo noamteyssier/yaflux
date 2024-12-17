@@ -1,5 +1,5 @@
 from collections import deque
-from typing import Any, Optional
+from typing import Any
 
 from .._base import Base
 from .._graph import build_read_graph
@@ -47,7 +47,8 @@ class Executor:
                     if indegrees[dependent_step] == 0:
                         if dependent_step in processed_steps:
                             raise ExecutorCircularDependencyError(
-                                f"Circular dependency detected in analysis steps: {step}"
+                                "Circular dependency detected in analysis steps: "
+                                + f"{step}"
                             )
                         queue.append(dependent_step)
 
@@ -60,7 +61,7 @@ class Executor:
 
     def execute(
         self,
-        target_step: Optional[str] = None,
+        target_step: str | None = None,
         force: bool = False,
         panic_on_existing: bool = False,
     ) -> Any:

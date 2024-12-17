@@ -36,15 +36,19 @@ class Results:
     def __delattr__(self, name: str) -> None:
         if not ResultsLock.can_mutate_key(name):
             raise UnauthorizedMutationError(
-                f"Results key '{name}' cannot be modified outside of the current context"
+                f"Results key '{name}' cannot be modified outside of current context"
             )
 
         if name == "_data" or name == "_metadata":
             raise AttributeError(f"Cannot delete attribute '{name}'")
 
-        if not FlagLock.can_mutate():
-            if name.startswith("_") and hasattr(self, name) and name != "_data":
-                raise FlagError(f"Cannot delete flag once set: {name}")
+        if (
+            not FlagLock.can_mutate()
+            and name.startswith("_")
+            and hasattr(self, name)
+            and name != "_data"
+        ):
+            raise FlagError(f"Cannot delete flag once set: {name}")
         try:
             del self._data[name]
         except KeyError as exc:
@@ -53,20 +57,23 @@ class Results:
     def __setattr__(self, name, value):
         if not ResultsLock.can_mutate_key(name):
             raise UnauthorizedMutationError(
-                f"Results key '{name}' cannot be modified outside of the current context"
+                f"Results key '{name}' cannot be modified outside of current context"
             )
         if name == "_data" or name == "_metadata":
             if not ResultsLock.can_mutate():
                 raise UnauthorizedMutationError(
-                    f"Cannot modify '{name}' attribute outside of the current context"
+                    f"Cannot modify '{name}' attribute outside of current context"
                 )
             object.__setattr__(self, name, value)
             return
 
-        if not FlagLock.can_mutate():
-            if name.startswith("_") and hasattr(self, name) and name != "_data":
-                raise FlagError(f"Cannot modify flag once set: {name}")
-
+        if (
+            not ResultsLock.can_mutate()
+            and name.startswith("_")
+            and hasattr(self, name)
+            and name != "_data"
+        ):
+            raise FlagError(f"Cannot modify flag once set: {name}")
         self._data[name] = value
 
     def __dir__(self):

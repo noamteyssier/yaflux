@@ -1,4 +1,4 @@
-from typing import Literal, Set
+from typing import Literal
 
 from ._check import _check_dot_exists, _check_graphviz
 from ._style import GraphConfig
@@ -11,7 +11,7 @@ def add_node(
     is_complete: bool,
     config: GraphConfig,
 ) -> None:
-    """Add a node to the graph with appropriate styling"""
+    """Add a node to the graph with appropriate styling."""
     style = config.node_styles[node_type]
     colors = getattr(config, f"{node_type}_colors")
 
@@ -35,7 +35,7 @@ def add_edge(
     to_node_type: Literal["step", "result", "flag"],
     is_mutation: bool = False,
 ) -> None:
-    """Add an edge to the graph with appropriate styling"""
+    """Add an edge to the graph with appropriate styling."""
     dot.edge(
         f"{from_node_type}_{from_node}",
         f"{to_node_type}_{to_node}",
@@ -47,7 +47,7 @@ def add_edge(
     )
 
 
-def visualize_dependencies(self, **kwargs):
+def visualize_dependencies(self, **kwargs):  # noqa: C901
     """Create a clear visualization of step dependencies using Graphviz.
 
     Parameters
@@ -66,7 +66,7 @@ def visualize_dependencies(self, **kwargs):
             "Install with `pip install yaflux[viz]`"
         )
     else:
-        from graphviz import Digraph  # type: ignore # noqa
+        from graphviz import Digraph  # type: ignore
     _check_dot_exists()
 
     # Get configuration options
@@ -81,7 +81,7 @@ def visualize_dependencies(self, **kwargs):
     dot.attr("edge", fontname=config.fontname)
     dot.attr("graph", fontsize=str(config.fontsize))
 
-    result_nodes: Set[str] = set()
+    result_nodes: set[str] = set()
 
     # Get all available steps including inherited ones
     available_steps = {}

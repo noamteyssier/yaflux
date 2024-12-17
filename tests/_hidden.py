@@ -7,7 +7,6 @@ def write_hidden_analysis(filepath: str):
 
     The code is written to a temporary file and executed in a separate process.
     """
-
     code = f"""
 import yaflux as yf
 

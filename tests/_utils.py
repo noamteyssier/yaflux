@@ -2,7 +2,7 @@ def _assert_out_of_order(analysis, step):
     """Tests for out of order execution of analysis steps."""
     try:
         step()
-        assert False
+        raise AssertionError()
     except ValueError:
         assert True
     assert step.__name__ not in analysis.completed_steps

@@ -21,7 +21,6 @@ def validate_incompatible_mutability(
     levels : dict[str, int]
         Mapping of step names to their topological level.
     """
-
     # Invert the level mapping to get all steps at each level
     level_map = {}
     for step, level in levels.items():

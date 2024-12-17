@@ -35,7 +35,9 @@ class FurtherExtendedAnalysis(ExtendedAnalysis):
     def final_process(self) -> list[int]:
         return [
             x + y
-            for x, y in zip(self.results.base_processed, self.results.extended_data)
+            for x, y in zip(
+                self.results.base_processed, self.results.extended_data, strict=False
+            )
         ]
 
 

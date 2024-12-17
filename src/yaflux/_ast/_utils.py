@@ -26,4 +26,4 @@ def get_function_node(func) -> ast.FunctionDef:
             raise ValueError("Could not parse function definition")
         return tree.body[0]
     except SyntaxError as e:
-        raise ValueError(f"Could not parse function source: {e}")
+        raise ValueError(f"Could not parse function source: {e}") from e

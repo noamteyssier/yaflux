@@ -9,9 +9,9 @@ from ._tarfile import TarfileSerializer
 
 __all__ = [
     "TarfileSerializer",
+    "YaxMissingParametersFileError",
     "YaxMissingResultError",
     "YaxMissingResultFileError",
     "YaxMissingVersionFileError",
-    "YaxMissingParametersFileError",
     "YaxNotArchiveFileError",
 ]
