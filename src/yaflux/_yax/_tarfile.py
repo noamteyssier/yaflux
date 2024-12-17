@@ -17,11 +17,12 @@ from ._toml import _format_toml_section
 class TarfileSerializer:
     """Handles serialization of analysis objects to/from yaflux archive format."""
 
-    VERSION = "0.2.0"
+    VERSION = "0.2.1"
     METADATA_NAME = "metadata.pkl"
     MANIFEST_NAME = "manifest.toml"
     RESULTS_DIR = "results"
     EXTENSION = ".yax"  # yaflux archive extension
+    COMPRESSED_EXTENSION = ".yax.gz"  # compressed yaflux archive extension
 
     @classmethod
     def _create_manifest(cls, metadata: dict, results: dict) -> str:
@@ -72,7 +73,9 @@ class TarfileSerializer:
         return "\n".join(_format_toml_section(manifest))
 
     @classmethod
-    def save(cls, filepath: str, analysis: Any, force: bool = False) -> None:
+    def save(
+        cls, filepath: str, analysis: Any, force: bool = False, compress: bool = False
+    ) -> None:
         """Save analysis to yaflux archive format.
 
         Parameters
@@ -84,10 +87,19 @@ class TarfileSerializer:
             Analysis object to save
         force : bool, optional
             Whether to overwrite existing file, by default False
+        compress : bool, optional
+            Whether to compress the archive (gzip), by default False
         """
-        # Ensure correct extension
-        if not filepath.endswith(cls.EXTENSION):
-            filepath = filepath + cls.EXTENSION
+        # Ensure correct file extension
+        if filepath.endswith(cls.EXTENSION) and compress:
+            filepath = filepath.replace(cls.EXTENSION, cls.COMPRESSED_EXTENSION)
+        elif filepath.endswith(cls.COMPRESSED_EXTENSION):
+            compress = True
+        elif not filepath.endswith(cls.EXTENSION):
+            if compress:
+                filepath = filepath + cls.COMPRESSED_EXTENSION
+            else:
+                filepath = filepath + cls.EXTENSION
 
         if not force and os.path.exists(filepath):
             raise FileExistsError(f"File already exists: '{filepath}'")
@@ -104,7 +116,8 @@ class TarfileSerializer:
         }
 
         # Create tarfile
-        with tarfile.open(filepath, "w:gz") as tar:
+        w_mode = "w:gz" if compress else "w"
+        with tarfile.open(filepath, w_mode) as tar:
             # Add metadata
             metadata_bytes = BytesIO(pickle.dumps(yax_metadata))
             metadata_info = tarfile.TarInfo(cls.METADATA_NAME)
@@ -162,7 +175,8 @@ class TarfileSerializer:
         select = cls._normalize_input(select)
         exclude = cls._normalize_input(exclude)
 
-        with tarfile.open(filepath, "r:gz") as tar:
+        r_mode = "r:gz" if filepath.endswith(".gz") else "r"
+        with tarfile.open(filepath, r_mode) as tar:
             # Load metadata
             metadata_file = tar.extractfile(cls.METADATA_NAME)
             if metadata_file is None:
@@ -219,7 +233,10 @@ class TarfileSerializer:
     @classmethod
     def is_yaflux_archive(cls, filepath: str) -> bool:
         """Check if file is a yaflux archive."""
-        return filepath.endswith(cls.EXTENSION) and tarfile.is_tarfile(filepath)
+        return (
+            filepath.endswith(cls.EXTENSION)
+            or filepath.endswith(cls.COMPRESSED_EXTENSION)
+        ) and tarfile.is_tarfile(filepath)
 
     @staticmethod
     def _normalize_input(options: list[str] | str | None) -> list[str] | None:

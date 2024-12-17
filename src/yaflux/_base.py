@@ -98,7 +98,7 @@ class Base:
             for step in self._step_ordering
         ]
 
-    def save(self, filepath: str, force=False):
+    def save(self, filepath: str, force=False, compress=False):
         """Save the analysis to a file.
 
         If the filepath ends in .yax, saves in yaflux archive format.
@@ -109,12 +109,19 @@ class Base:
             Path to save the analysis
         force : bool, optional
             Whether to overwrite existing file, by default False
+        compress : bool, optional
+            Whether to compress the file, by default False
         """
         if filepath.endswith(TarfileSerializer.EXTENSION):
-            TarfileSerializer.save(filepath, self, force)
+            TarfileSerializer.save(filepath, self, force=force, compress=compress)
+        elif filepath.endswith(TarfileSerializer.COMPRESSED_EXTENSION):
+            TarfileSerializer.save(filepath, self, force=force, compress=True)
         else:
             TarfileSerializer.save(
-                f"{filepath}.{TarfileSerializer.EXTENSION}", self, force
+                f"{filepath}.{TarfileSerializer.EXTENSION}",
+                self,
+                force=force,
+                compress=compress,
             )
 
     @classmethod
