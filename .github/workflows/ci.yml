@@ -75,7 +75,7 @@ jobs:
 
       - name: Run linting
         run: |
-          uv run ruff check src/
+          uv run ruff check .
 
   testing:
     runs-on: "ubuntu-latest"
