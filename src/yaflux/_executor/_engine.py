@@ -32,7 +32,7 @@ class Executor:
                 [req for req in chain(method.creates, method.creates_flags)]
             )
             method_requires[step_name] = set(
-                [req for req in chain(method.requires, method.requires_flags)]
+                [req for req in chain(method.requires, method.requires_flags, method.mutates)]
             )
 
         # Build graph
