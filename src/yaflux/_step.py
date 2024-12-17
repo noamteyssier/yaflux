@@ -1,7 +1,8 @@
 import functools
 import inspect
 import time
-from typing import Any, Callable, Optional, TypeVar, Union
+from collections.abc import Callable
+from typing import Any, TypeVar
 
 from yaflux._ast import validate_ast
 from yaflux._base import Base
@@ -22,7 +23,7 @@ def _pull_flags(arglist: list[str]) -> tuple[list[str], list[str]]:
     return args, flags
 
 
-def _normalize_list(value: Optional[Union[list[str], str]]) -> list[str]:
+def _normalize_list(value: list[str] | str | None) -> list[str]:
     """Convert string or list input to normalized list."""
     if isinstance(value, str):
         return [value]
@@ -57,7 +58,7 @@ def _check_required_flags(analysis: Base, requires: list[str]) -> None:
 
 def _handle_existing_attributes(
     analysis: Base, creates: list[str], force: bool, panic: bool
-) -> Optional[dict[str, Any]]:
+) -> dict[str, Any] | None:
     """Handle cases where results already exist."""
     for attr in creates:
         if hasattr(analysis._results, attr):
@@ -106,7 +107,7 @@ def _store_inferred_tuple_results(
     if len(result) != len(creates):
         raise ValueError("Tuple result must have the same length as the creates list")
 
-    for attr, value in zip(creates, result):
+    for attr, value in zip(creates, result, strict=False):
         setattr(analysis._results, attr, value)
 
 
@@ -123,7 +124,6 @@ def _store_results(
     result: Any,
 ) -> None:
     """Store the function results in the analysis object."""
-
     # If the result is a dictionary, unpack it into the results object
     if isinstance(result, dict):
         try:  # Try to store the dictionary results
@@ -180,7 +180,7 @@ def step(
     requires: list[str] | str | None = None,
     mutates: list[str] | str | None = None,
 ) -> Callable:
-    """Decorator to register analysis steps and their results.
+    """Register analysis steps and their results.
 
     Parameters
     ----------

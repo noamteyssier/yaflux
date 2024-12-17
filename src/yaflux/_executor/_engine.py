@@ -1,5 +1,5 @@
 from collections import deque
-from typing import Any, Optional
+from typing import Any
 
 from .._base import Base
 from .._graph import build_read_graph
@@ -60,7 +60,7 @@ class Executor:
 
     def execute(
         self,
-        target_step: Optional[str] = None,
+        target_step: str | None = None,
         force: bool = False,
         panic_on_existing: bool = False,
     ) -> Any:

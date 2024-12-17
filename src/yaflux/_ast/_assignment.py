@@ -5,7 +5,7 @@ from ._utils import get_function_node
 
 
 def _get_leftmost_name(node) -> str | None:
-    """Returns the leftmost name in an assignment node."""
+    """Return the leftmost name in an assignment node."""
     if isinstance(node, ast.Name):
         return node.id
     if isinstance(node, ast.Attribute):
@@ -14,7 +14,7 @@ def _get_leftmost_name(node) -> str | None:
 
 
 def _build_assignment_name(node) -> str:
-    """Returns the full assignment path to the leftmost name in an assignment node.
+    """Return the full assignment path to the leftmost name in an assignment node.
 
     i.e.
 
@@ -35,7 +35,7 @@ class AssignmentVisitor(ast.NodeVisitor):
         self.mutates = set(mutates)
         self.assignees: set[str] = set()
 
-    def visit_Assign(self, node: ast.Assign) -> None:
+    def visit_Assign(self, node: ast.Assign) -> None:  # noqa
         # Check for pattern: self.{attr} = ...
 
         if (
@@ -66,7 +66,6 @@ def validate_no_self_assignment(func, mutates: list[str]) -> None:
         A list of attributes that are mutated by the function. If self is assigned to
         attributes outside of this list, an error is raised.
     """
-
     # Get the function AST node
     func_node = get_function_node(func)
 

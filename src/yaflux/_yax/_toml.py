@@ -17,14 +17,14 @@ def _format_toml_value(value: Any) -> str:
     """Format a Python value as a TOML value."""
     if isinstance(value, bool):
         return str(value).lower()
-    elif isinstance(value, (int, float)):
+    elif isinstance(value, int | float):
         return str(value)
     elif isinstance(value, str):
         # Use basic strings for simple cases, literal strings for complex ones
         if re.match(r"^[a-zA-Z0-9_.-]+$", value):
             return value
         return f'"{_escape_toml_string(value)}"'
-    elif isinstance(value, (list, tuple)):
+    elif isinstance(value, list | tuple):
         items = [_format_toml_value(item) for item in value]
         return f"[{', '.join(items)}]"
     elif isinstance(value, dict):
@@ -42,10 +42,7 @@ def _format_toml_section(data: dict, prefix: str = "") -> list[str]:
 
     for key, value in data.items():
         if isinstance(value, dict):
-            if prefix:
-                section_name = f"{prefix}.{key}"
-            else:
-                section_name = key
+            section_name = f"{prefix}.{key}" if prefix else key
             sections.extend(["", f"[{section_name}]", *_format_toml_section(value)])
         else:
             simple_pairs.append(f"{key} = {_format_toml_value(value)}")

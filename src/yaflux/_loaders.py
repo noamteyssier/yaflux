@@ -1,5 +1,5 @@
 # yaflux/_loaders.py
-from typing import Type, TypeVar
+from typing import TypeVar
 
 from ._base import Base
 from ._results import ResultsLock
@@ -10,7 +10,7 @@ T = TypeVar("T", bound="Base")
 
 def load(
     filepath: str,
-    cls: Type[T] | None = None,
+    cls: type[T] | None = None,
     no_results: bool = False,
     select: list[str] | str | None = None,
     exclude: list[str] | str | None = None,
@@ -32,11 +32,7 @@ def load(
         Skip specific results (yax format only), by default None
     """
     if TarfileSerializer.is_yaflux_archive(filepath):
-        if cls is None:
-            build_cls = Base
-        else:
-            build_cls = cls
-
+        build_cls = cls if cls is not None else Base
         metadata, results = TarfileSerializer.load(
             filepath, no_results=no_results, select=select, exclude=exclude
         )
@@ -56,12 +52,11 @@ def load(
 
 def _load_file(
     filepath: str,
-    cls: Type[T],
+    cls: type[T],
     metadata: dict,
     results: dict,
 ) -> T:
     """Inner function to load a file as a specific class."""
-
     # Create new instance
     instance = cls(parameters=metadata["parameters"])
 
