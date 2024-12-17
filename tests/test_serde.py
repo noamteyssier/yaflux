@@ -52,7 +52,7 @@ def test_save_panic_on_found():
     # Try saving
     try:
         analysis.save(filepath=OUTPUT_PATH)
-        assert False
+        raise AssertionError()
     except FileExistsError:
         pass
 

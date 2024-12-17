@@ -44,7 +44,7 @@ def test_invalid_target_step():
     analysis = ComplexAnalysis()
     try:
         analysis.execute("res_b")
-        assert False
+        raise AssertionError()
     except yf.ExecutorMissingTargetStepError:
         assert True
 
@@ -131,7 +131,7 @@ def test_empty_analysis():
     analysis = EmptyAnalysis()
     try:
         analysis.execute_all()
-        assert False
+        raise AssertionError()
     except yf.ExecutorMissingStartError:
         assert True
 

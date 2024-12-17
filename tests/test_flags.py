@@ -33,7 +33,7 @@ def test_flag_usage_out_of_order():
     analysis.setup()
     try:
         analysis.use_mut()
-        assert False
+        raise AssertionError()
     except ValueError as e:
         assert "_mut_a" in str(e)
 

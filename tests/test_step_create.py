@@ -74,8 +74,8 @@ def test_create_null():
     analysis.create_null()
     assert "create_null" in analysis.completed_steps
     try:
-        analysis.results.create_null
-        assert False
+        _ = analysis.results.create_null
+        raise AssertionError()
     except AttributeError:
         pass
 
@@ -134,7 +134,7 @@ def test_create_return_superset_dict():
     analysis = CreateTesting()
     try:
         analysis.creates_return_superset_dict()
-        assert False
+        raise AssertionError()
     except ValueError as exc:
         assert "superset of creates list" in str(exc)
 
