@@ -35,7 +35,7 @@ class AssignmentVisitor(ast.NodeVisitor):
         self.mutates = set(mutates)
         self.assignees: set[str] = set()
 
-    def visit_Assign(self, node: ast.Assign) -> None:  # noqa
+    def visit_Assign(self, node: ast.Assign) -> None: # noqa
         # Check for pattern: self.{attr} = ...
 
         if (
@@ -51,7 +51,8 @@ class AssignmentVisitor(ast.NodeVisitor):
                 if base_attr not in self.mutates:
                     self.assignees.add(assignment_name)
 
-            else:  # all non-results assignments are illegal regardless of `mutates` list
+             # all non-results assignments are illegal regardless of `mutates`
+            else:
                 self.assignees.add(assignment_name)
 
 

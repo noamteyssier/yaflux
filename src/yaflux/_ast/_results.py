@@ -10,7 +10,7 @@ class ResultsAttributeVisitor(ast.NodeVisitor):
     def __init__(self):
         self.accessed_attrs: set[str] = set()
 
-    def visit_Attribute(self, node: ast.Attribute) -> None:
+    def visit_Attribute(self, node: ast.Attribute) -> None: # noqa: N802
         """Visit attribute access nodes in the AST."""
         # Check for pattern: self.results.{attr}
         if (
@@ -26,7 +26,8 @@ class ResultsAttributeVisitor(ast.NodeVisitor):
 def validate_results_usage(
     func_node: ast.FunctionDef, requires: list[str]
 ) -> tuple[list[str], list[str]]:
-    """
+    """Validate all accesses are declared in requires.
+
     Validate that all self.results.{attr} accesses are declared in requires
     and all requires are actually used.
 
@@ -56,8 +57,7 @@ def validate_results_usage(
 
 
 def validate_step_requirements(func, requires: list[str]) -> None:
-    """
-    Parse a function's AST and validate all self.results accesses.
+    """Parse a function's AST and validate all self.results accesses.
 
     Parameters
     ----------
@@ -91,7 +91,8 @@ def validate_step_requirements(func, requires: list[str]) -> None:
         import warnings
 
         warnings.warn(
-            f"The following required attributes are never accessed in {func_name}: {unused}. "
-            f"Consider removing them from the 'requires' parameter.",
+            "The following required attributes are never accessed in ",
+            f"{func_name}: {unused}. ",
+            "Consider removing them from the 'requires' parameter.",
             stacklevel=2,
         )
