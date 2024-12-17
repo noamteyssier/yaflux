@@ -30,9 +30,7 @@ if __name__ == "__main__":
     dot = analysis.visualize_dependencies()
     dot.render("dependencies", cleanup=True)
 
-
     class AnalysisWithMutations(yf.Base):
-
         @yf.step(creates="a")
         def step_a(self):
             return 42

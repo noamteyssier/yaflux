@@ -1,3 +1,5 @@
+import pytest
+
 import yaflux as yf
 
 
@@ -148,13 +150,10 @@ def test_non_dag_analysis_missing_start():
         def step_c(self) -> int:
             return self.results.res_a
 
-    analysis = MissingStart()
-    # analysis.visualize_dependencies().render("missing_start", cleanup=True)
-    try:
-        analysis.execute_all()
-        assert False
-    except yf.ExecutorMissingStartError:
-        assert True
+    with pytest.raises(yf.CircularDependencyError) as exc:
+        MissingStart()
+
+    assert "step_a" in str(exc.value)
 
 
 def test_non_dag_analysis_circular_downstream():
@@ -179,10 +178,32 @@ def test_non_dag_analysis_circular_downstream():
             _ = self.results.res_c
             return 42
 
-    analysis = CircularDownstream()
-    # analysis.visualize_dependencies().render("circular", cleanup=True)
-    try:
-        analysis.execute_all()
-        assert False
-    except yf.ExecutorCircularDependencyError:
-        assert True
+    with pytest.raises(yf.CircularDependencyError) as exc:
+        CircularDownstream()
+    assert "step_c" in str(exc.value)
+
+
+def test_mutable_dag_execution():
+    class MutableDag(yf.Base):
+        @yf.step(creates="res_a")
+        def step_a(self) -> int:
+            return 42
+
+        @yf.step(mutates="res_a")
+        def step_b(self):
+            self.results.res_a = 10
+
+        @yf.step(mutates="res_a")
+        def step_c(self):
+            self.results.res_a = 30
+
+        @yf.step(creates="res_d", requires="res_a")
+        def step_d(self) -> int:
+            return self.results.res_a * 2
+
+    with pytest.raises(yf.MutabilityConflictError) as exc:
+        _ = MutableDag()
+
+    assert "step_b + step_c: {'step_a'}" in str(exc.value)
+    assert "step_b + step_d: {'step_a'}" in str(exc.value)
+    assert "step_c + step_d: {'step_a'}" in str(exc.value)
