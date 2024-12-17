@@ -47,7 +47,8 @@ class Executor:
                     if indegrees[dependent_step] == 0:
                         if dependent_step in processed_steps:
                             raise ExecutorCircularDependencyError(
-                                f"Circular dependency detected in analysis steps: {step}"
+                                "Circular dependency detected in analysis steps: "+
+                                f"{step}"
                             )
                         queue.append(dependent_step)
 
