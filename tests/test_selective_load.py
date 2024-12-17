@@ -16,7 +16,12 @@ class MyAnalysis(yf.Base):
 
     @yf.step(creates="final_data", requires=["base_data", "mixin_data"])
     def final_process(self) -> list[int]:
-        return [x + y for x, y in zip(self.results.base_data, self.results.mixin_data)]
+        return [
+            x + y
+            for x, y in zip(
+                self.results.base_data, self.results.mixin_data, strict=False
+            )
+        ]
 
 
 def run_and_save(path: str):

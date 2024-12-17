@@ -5,7 +5,6 @@ import yaflux as yf
 
 def test_ast_validation():
     """Test that AST validation catches undeclared results access."""
-
     with pytest.raises(yf.AstUndeclaredUsageError) as exc:
 
         class BadAnalysis(yf.Base):
@@ -26,7 +25,6 @@ def test_ast_validation():
 
 def test_ast_validation_multiple_accesses():
     """Test validation with multiple results accesses."""
-
     with pytest.raises(yf.AstUndeclaredUsageError) as exc:
 
         class BadAnalysis(yf.Base):
@@ -46,7 +44,6 @@ def test_ast_validation_multiple_accesses():
 
 def test_ast_validation_nested_access():
     """Test validation catches nested access patterns."""
-
     with pytest.raises(yf.AstUndeclaredUsageError) as exc:
 
         class BadAnalysis(yf.Base):
