@@ -100,11 +100,7 @@ def compute_topological_levels(graph: dict[str, set[str]]) -> dict[str, int]:
         visited.add(node)
 
         # Compute level as 1 + max level of dependencies
-        if not graph[node]:
-            level = 0
-        else:
-            level = 1 + max(visit(dep) for dep in graph[node])
-
+        level = 0 if not graph[node] else 1 + max(visit(dep) for dep in graph[node])
         levels[node] = level
         visited.remove(node)
         return level

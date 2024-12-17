@@ -47,7 +47,7 @@ def add_edge(
     )
 
 
-def visualize_dependencies(self, **kwargs): # noqa: C901
+def visualize_dependencies(self, **kwargs):  # noqa: C901
     """Create a clear visualization of step dependencies using Graphviz.
 
     Parameters

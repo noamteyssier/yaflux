@@ -133,7 +133,7 @@ class TarfileSerializer:
                 tar.addfile(result_info, result_bytes)
 
     @classmethod
-    def load( # noqa: C901
+    def load(  # noqa: C901
         cls,
         filepath: str,
         *,

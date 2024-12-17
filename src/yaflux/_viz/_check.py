@@ -2,7 +2,7 @@ import shutil
 
 
 def _check_graphviz():
-    """Check if graphviz and its executables are available"""
+    """Check if graphviz and its executables are available."""
     try:
         import graphviz  # type: ignore # noqa
 
