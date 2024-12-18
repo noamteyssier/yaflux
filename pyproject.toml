@@ -31,7 +31,7 @@ docs = [
 ]
 testing = [
     "pytest>=8.3.4",
-    "yaflux[anndata,numpy,pandas]", # for testing serialization
+    "yaflux[io]",    # for testing serialization
 ]
 linting = ["ruff>=0.8.2"]
 type-checking = ["pyright>=1.1.390"]
