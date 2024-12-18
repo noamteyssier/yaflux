@@ -44,7 +44,7 @@ class AnnDataSerializer(Serializer):
         tmp = tempfile.NamedTemporaryFile(suffix=".h5ad", delete=False)  # noqa
 
         # Write to a temporary file
-        data.write_h5ad(tmp.name) # type: ignore
+        data.write_h5ad(tmp.name)  # type: ignore
 
         # Get file size for metadata
         size = os.path.getsize(tmp.name)
@@ -74,7 +74,7 @@ class AnnDataSerializer(Serializer):
 
         buffer = BytesIO(data)
         try:
-            return ad.read_h5ad(buffer) # type: ignore
+            return ad.read_h5ad(buffer)  # type: ignore
         except Exception as e:
             raise ValueError(f"Failed to deserialize AnnData: {e!s}") from e
         finally:

@@ -161,12 +161,12 @@ class TarfileSerializer:
             result_path = os.path.join(cls.RESULTS_DIR, f"{key}.{metadata.format}")
 
             if isinstance(result, str):
-                tmp_name = result if not hasattr(result, "name") else result.name # type: ignore
+                tmp_name = result if not hasattr(result, "name") else result.name  # type: ignore
                 tar.add(tmp_name, arcname=result_path)
 
                 # clean up temp file
                 if hasattr(result, "name"):
-                    result.close() # type: ignore
+                    result.close()  # type: ignore
 
                 os.unlink(tmp_name)
 
