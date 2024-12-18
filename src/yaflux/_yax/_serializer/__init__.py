@@ -1,7 +1,21 @@
+import importlib.util
+
 from ._base import SerializerMetadata, SerializerRegistry
-from ._formats import PickleSerializer
+from ._formats import AnnDataSerializer, PickleSerializer
 
-__all__ = ["PickleSerializer", "SerializerMetadata", "SerializerRegistry"]
+__all__ = [
+    "PickleSerializer",
+    "SerializerMetadata",
+    "SerializerRegistry",
+    "AnnDataSerializer",
+]
 
-# Always register the PickleSerializer as a fallback
+# Register the serializers
+try:
+    importlib.util.find_spec("anndata")
+    SerializerRegistry.register(AnnDataSerializer)
+except ImportError:
+    pass  # Anndata is not installed
+
+# Always register the pickle serializer last as a fallback
 SerializerRegistry.register(PickleSerializer)

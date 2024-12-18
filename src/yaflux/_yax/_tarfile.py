@@ -155,11 +155,23 @@ class TarfileSerializer:
         """Write results to the archive."""
         for key, value in results.items():
             serializer = SerializerRegistry.get_serializer(value)
-            data, metadata = serializer.serialize(value)
+            result, metadata = serializer.serialize(value)
             results_metadata[key] = metadata
 
             result_path = os.path.join(cls.RESULTS_DIR, f"{key}.{metadata.format}")
-            cls._add_bytes_to_tar(tar, result_path, data)
+
+            if isinstance(result, str):
+                tmp_name = result.name if hasattr(result, "name") else result
+                tar.add(tmp_name, arcname=result_path)
+
+                # clean up temp file
+                if hasattr(result, "name"):
+                    result.close()
+
+                os.unlink(tmp_name)
+
+            else:
+                cls._add_bytes_to_tar(tar, result_path, result)
 
     @classmethod
     def _read_metadata(cls, tar: tarfile.TarFile) -> dict:
