@@ -1,6 +1,6 @@
 import os
 import tempfile
-from typing import Any, BinaryIO
+from typing import Any
 
 from .._base import Serializer, SerializerMetadata
 
@@ -26,7 +26,7 @@ class NumpySerializer(Serializer):
             return False
 
     @classmethod
-    def serialize(cls, data: Any) -> tuple[str | BinaryIO, SerializerMetadata]:
+    def serialize(cls, data: Any) -> tuple[str, SerializerMetadata]:
         """Serialize numpy object to bytes."""
         try:
             import numpy as np

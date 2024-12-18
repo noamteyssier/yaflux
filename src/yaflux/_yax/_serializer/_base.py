@@ -28,7 +28,7 @@ class Serializer(ABC):
 
     @classmethod
     @abstractmethod
-    def serialize(cls, obj: Any) -> tuple[bytes, SerializerMetadata]:
+    def serialize(cls, data: Any) -> tuple[bytes | str, SerializerMetadata]:
         """Serialize object to bytes with metadata."""
         pass
 

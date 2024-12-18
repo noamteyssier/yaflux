@@ -14,15 +14,15 @@ class PickleSerializer(Serializer):
         return True
 
     @classmethod
-    def serialize(cls, obj: Any) -> tuple[bytes, SerializerMetadata]:
-        data = pickle.dumps(obj)
+    def serialize(cls, data: Any) -> tuple[bytes, SerializerMetadata]:
+        bytes = pickle.dumps(data)
         metadata = SerializerMetadata(
             format=cls.FORMAT,
-            type_name=type(obj).__name__,
-            module_name=type(obj).__module__,
-            size_bytes=len(data),
+            type_name=type(data).__name__,
+            module_name=type(data).__module__,
+            size_bytes=len(bytes),
         )
-        return data, metadata
+        return bytes, metadata
 
     @classmethod
     def deserialize(cls, data: bytes, metadata: SerializerMetadata) -> Any:

@@ -1,6 +1,6 @@
 import os
 import tempfile
-from typing import Any, BinaryIO
+from typing import Any
 
 from .._base import Serializer, SerializerMetadata
 
@@ -26,7 +26,7 @@ class AnnDataSerializer(Serializer):
             return False
 
     @classmethod
-    def serialize(cls, data: Any) -> tuple[str | BinaryIO, SerializerMetadata]:
+    def serialize(cls, data: Any) -> tuple[str, SerializerMetadata]:
         """Serialize AnnData object to bytes."""
         try:
             import anndata as ad
@@ -44,7 +44,7 @@ class AnnDataSerializer(Serializer):
         tmp = tempfile.NamedTemporaryFile(suffix=".h5ad", delete=False)  # noqa
 
         # Write to a temporary file
-        data.write_h5ad(tmp.name)
+        data.write_h5ad(tmp.name) # type: ignore
 
         # Get file size for metadata
         size = os.path.getsize(tmp.name)
@@ -74,7 +74,7 @@ class AnnDataSerializer(Serializer):
 
         buffer = BytesIO(data)
         try:
-            return ad.read_h5ad(buffer)
+            return ad.read_h5ad(buffer) # type: ignore
         except Exception as e:
             raise ValueError(f"Failed to deserialize AnnData: {e!s}") from e
         finally:
