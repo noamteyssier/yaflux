@@ -11,13 +11,12 @@ M = 100
 
 OUTPUT = "test_yax_pandas.yax"
 
+
 class Analysis(yf.Base):
     @yf.step(creates="df")
     def create_dataframe(self) -> pd.DataFrame:
-        return pd.DataFrame({
-            f"col_{i}": list(range(N))
-            for i in range(M)
-        })
+        return pd.DataFrame({f"col_{i}": list(range(N)) for i in range(M)})
+
 
 def test_serde_with_pandas():
     analysis = Analysis()
@@ -36,8 +35,8 @@ def test_serde_with_pandas():
     # Clean up
     os.remove(OUTPUT)
 
-def test_serde_without_pandas():
 
+def test_serde_without_pandas():
     original_serializers = SerializerRegistry._serializers.copy()
 
     try:
