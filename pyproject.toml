@@ -13,7 +13,8 @@ requires-python = ">=3.10"
 viz = ["graphviz>=0.20.3"]
 anndata = ["anndata>=0.7.6"]
 numpy = ["numpy>=2.0.0"]
-full = ["yaflux[viz,anndata,numpy]"]
+pandas = ["pandas>=2.0.0", "pyarrow>=18.0.0"]
+full = ["yaflux[viz,anndata,numpy,pandas]"]
 
 [build-system]
 requires = ["hatchling"]
@@ -29,7 +30,7 @@ docs = [
 ]
 testing = [
     "pytest>=8.3.4",
-    "yaflux[anndata,numpy]", # for testing serialization
+    "yaflux[anndata,numpy,pandas]", # for testing serialization
 ]
 linting = ["ruff>=0.8.2"]
 type-checking = ["pyright>=1.1.390"]
