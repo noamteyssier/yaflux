@@ -59,43 +59,6 @@ class AnnDataSerializer(Serializer):
 
         return tmp.name, metadata
 
-        # with tempfile.NamedTemporaryFile(suffix='.h5ad', delete=False) as tmp:
-        #     try:
-        #         # Write to temporary file
-        #         data.write_h5ad(tmp.name)
-
-        #         # Read the file contents
-        #         with open(tmp.name, 'rb') as f:
-        #             bytes_data = f.read()
-
-        #         # Create metadata
-        #         metadata = SerializerMetadata(
-        #             format=cls.FORMAT,
-        #             type_name=type(data).__name__,
-        #             module_name=type(data).__module__,
-        #             size_bytes=len(bytes_data)
-        #         )
-
-        #         return bytes_data, metadata
-
-        #     finally:
-        #         # Clean up temporary file
-        #         os.unlink(tmp.name)
-
-        # buffer = BytesIO()
-        # try:
-        #     data.write_h5ad(buffer)
-        #     bytes_data = buffer.getvalue()
-        #     metadata = SerializerMetadata(
-        #         format=cls.FORMAT,
-        #         type_name=type(data).__name__,
-        #         module_name=type(data).__module__,
-        #         size_bytes=len(bytes_data),
-        #     )
-        #     return bytes_data, metadata
-        # finally:
-        #     buffer.close()
-
     @classmethod
     def deserialize(cls, data: bytes, metadata: SerializerMetadata) -> Any:
         """Deserialize bytes back into an AnnData object."""
