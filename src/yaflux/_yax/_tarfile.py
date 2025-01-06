@@ -247,15 +247,21 @@ class TarfileSerializer:
             result_path = os.path.join(
                 cls.RESULTS_DIR, f"{key}.{result_metadata.format}"
             )
+
+            # Extract the BufferedIOReader from the tarfile
             result_file = tar.extractfile(result_path)
+
             if result_file is None:
                 raise YaxMissingResultError(f"Missing result file: {result_path}")
 
             for serializer in SerializerRegistry._serializers:
                 if result_metadata.format == serializer.FORMAT:
+
+                    # Deserialize from the BufferedIOReader
                     results[key] = serializer.deserialize(
-                        result_file.read(), result_metadata
+                        result_file, result_metadata
                     )
+
                     break
             else:
                 raise ValueError(

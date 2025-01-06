@@ -63,8 +63,6 @@ class AnnDataSerializer(Serializer):
     def deserialize(cls, data: bytes, metadata: SerializerMetadata) -> Any:
         """Deserialize bytes back into an AnnData object."""
         try:
-            from io import BytesIO
-
             import anndata as ad
         except ImportError as e:
             raise ImportError(
@@ -72,10 +70,20 @@ class AnnDataSerializer(Serializer):
                 "Install with: pip install yaflux[anndata]"
             ) from e
 
-        buffer = BytesIO(data)
-        try:
-            return ad.read_h5ad(buffer)  # type: ignore
-        except Exception as e:
-            raise ValueError(f"Failed to deserialize AnnData: {e!s}") from e
-        finally:
-            buffer.close()
+        with tempfile.NamedTemporaryFile(suffix=".h5ad") as tmp:
+            try:
+                # Write to a tmp file
+                #
+                # h5ad reads with random access so buffers are inefficient
+                tmp.write(data.read())
+                tmp.flush()
+
+                # Read from the tmp file
+                return ad.read_h5ad(tmp.name)
+
+            except Exception as e:
+                raise ValueError(f"Failed to deserialize AnnData: {e!s}") from e
+
+            finally:
+                # Close the tmp file
+                tmp.close()

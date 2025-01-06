@@ -75,7 +75,7 @@ class PandasSerializer(Serializer):
                 "Install with: pip install yaflux[pandas]"
             ) from e
 
-        buffer = BytesIO(data)
+        buffer = BytesIO(data.read())
         try:
             # Read Arrow Table from buffer and convert to DataFrame
             reader = pa.ipc.RecordBatchFileReader(buffer)

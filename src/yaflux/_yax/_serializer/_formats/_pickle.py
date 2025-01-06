@@ -26,4 +26,4 @@ class PickleSerializer(Serializer):
 
     @classmethod
     def deserialize(cls, data: bytes, metadata: SerializerMetadata) -> Any:
-        return pickle.loads(data)
+        return pickle.loads(data.read())

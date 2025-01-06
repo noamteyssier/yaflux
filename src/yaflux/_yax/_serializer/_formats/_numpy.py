@@ -73,7 +73,7 @@ class NumpySerializer(Serializer):
                 "Install with: pip install yaflux[numpy]"
             ) from e
 
-        buffer = BytesIO(data)
+        buffer = BytesIO(data.read())
         try:
             return np.load(buffer)
         except Exception as e:
