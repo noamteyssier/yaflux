@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, ClassVar, TypeVar
+from typing import IO, Any, ClassVar, TypeVar
 
 T = TypeVar("T")
 
@@ -34,7 +34,7 @@ class Serializer(ABC):
 
     @classmethod
     @abstractmethod
-    def deserialize(cls, data: bytes, metadata: SerializerMetadata) -> Any:
+    def deserialize(cls, data: IO[bytes], metadata: SerializerMetadata) -> Any:
         """Deserialize object from bytes using metadata."""
         pass
 

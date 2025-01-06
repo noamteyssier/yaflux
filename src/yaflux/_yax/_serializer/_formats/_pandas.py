@@ -1,6 +1,6 @@
 import os
 import tempfile
-from typing import Any
+from typing import IO, Any
 
 from .._base import Serializer, SerializerMetadata
 
@@ -63,7 +63,7 @@ class PandasSerializer(Serializer):
         return tmp.name, metadata
 
     @classmethod
-    def deserialize(cls, data: bytes, metadata: SerializerMetadata) -> Any:
+    def deserialize(cls, data: IO[bytes], metadata: SerializerMetadata) -> Any:
         """Deserialize bytes back into a DataFrame."""
         try:
             from io import BytesIO

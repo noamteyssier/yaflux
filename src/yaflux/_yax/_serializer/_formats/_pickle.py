@@ -1,5 +1,5 @@
 import pickle
-from typing import Any
+from typing import IO, Any
 
 from .._base import Serializer, SerializerMetadata
 
@@ -25,5 +25,5 @@ class PickleSerializer(Serializer):
         return bytes, metadata
 
     @classmethod
-    def deserialize(cls, data: bytes, metadata: SerializerMetadata) -> Any:
+    def deserialize(cls, data: IO[bytes], metadata: SerializerMetadata) -> Any:
         return pickle.loads(data.read())
