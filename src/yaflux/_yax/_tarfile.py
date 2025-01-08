@@ -1,3 +1,4 @@
+import json
 import os
 import pickle
 import tarfile
@@ -6,40 +7,97 @@ from io import BytesIO
 from typing import Any
 
 from ._error import (
-    YaxMissingParametersFileError,
     YaxMissingResultError,
-    YaxMissingResultFileError,
     YaxMissingVersionFileError,
 )
-from ._toml import _format_toml_section
+from ._serializer import SerializerMetadata, SerializerRegistry
 
 
 class TarfileSerializer:
     """Handles serialization of analysis objects to/from yaflux archive format."""
 
-    VERSION = "0.2.1"
+    VERSION = "0.3.0"
     METADATA_NAME = "metadata.pkl"
-    MANIFEST_NAME = "manifest.toml"
+    MANIFEST_NAME = "manifest.json"
     RESULTS_DIR = "results"
     EXTENSION = ".yax"  # yaflux archive extension
     COMPRESSED_EXTENSION = ".yax.gz"  # compressed yaflux archive extension
 
     @classmethod
-    def _create_manifest(cls, metadata: dict, results: dict) -> str:
-        """Create a TOML manifest of the archive contents.
+    def save(
+        cls, filepath: str, analysis: Any, force: bool = False, compress: bool = False
+    ) -> None:
+        """Save analysis to yaflux archive format."""
+        filepath = cls._resolve_filepath(filepath, compress, force)
 
-        Parameters
-        ----------
-        metadata : dict
-            Analysis metadata
-        results : dict
-            Analysis results
+        metadata = cls._create_metadata(analysis)
+        results_metadata = {}
 
-        Returns
-        -------
-        str
-            TOML formatted manifest
-        """
+        with tarfile.open(filepath, "w:gz" if compress else "w") as tar:
+            cls._write_metadata(tar, metadata)
+            cls._write_parameters(tar, analysis.parameters)
+            cls._write_results(tar, analysis._results._data, results_metadata)
+            cls._write_manifest(tar, metadata, results_metadata)
+
+    @classmethod
+    def load(
+        cls,
+        filepath: str,
+        *,
+        no_results: bool = False,
+        select: list[str] | str | None = None,
+        exclude: list[str] | str | None = None,
+    ) -> tuple[dict[str, Any], dict[str, Any]]:
+        """Load analysis from yaflux archive format."""
+        select = cls._normalize_input(select)
+        exclude = cls._normalize_input(exclude)
+
+        with tarfile.open(filepath, "r:gz" if filepath.endswith(".gz") else "r") as tar:
+            metadata = cls._read_metadata(tar)
+            manifest = cls._read_manifest(tar)
+            metadata["parameters"] = cls._read_parameters(tar)
+
+            if no_results:
+                return metadata, {}
+
+            to_load = cls._determine_results_to_load(
+                metadata["result_keys"], select, exclude
+            )
+            results = cls._load_results(tar, to_load, manifest)
+
+            return metadata, results
+
+    @classmethod
+    def _resolve_filepath(cls, filepath: str, compress: bool, force: bool) -> str:
+        """Resolve and validate the output filepath."""
+        if filepath.endswith(cls.EXTENSION) and compress:
+            filepath = filepath.replace(cls.EXTENSION, cls.COMPRESSED_EXTENSION)
+        elif filepath.endswith(cls.COMPRESSED_EXTENSION):
+            compress = True
+        elif not filepath.endswith(cls.EXTENSION):
+            filepath += cls.COMPRESSED_EXTENSION if compress else cls.EXTENSION
+
+        if not force and os.path.exists(filepath):
+            raise FileExistsError(f"File already exists: '{filepath}'")
+
+        return filepath
+
+    @classmethod
+    def _create_metadata(cls, analysis: Any) -> dict:
+        """Create metadata dictionary for the analysis."""
+        return {
+            "version": cls.VERSION,
+            "parameters": analysis.parameters,
+            "completed_steps": list(analysis._completed_steps),
+            "step_metadata": analysis._results._metadata,
+            "result_keys": list(analysis._results._data.keys()),
+            "step_ordering": analysis._step_ordering,
+            "timestamp": datetime.now().timestamp(),
+        }
+
+    @classmethod
+    def _create_manifest(cls, metadata: dict, results_metadata: dict) -> str:
+        """Create a JSON manifest of the archive contents."""
         manifest = {
             "archive_info": {
                 "version": metadata["version"],
@@ -53,182 +111,176 @@ class TarfileSerializer:
             },
             "results": {
                 name: {
-                    "type": type(value).__name__,
-                    "module": type(value).__module__,
-                    "size_bytes": len(pickle.dumps(value)),
+                    "type": meta.type_name,
+                    "module": meta.module_name,
+                    "format": meta.format,
+                    "size_bytes": meta.size_bytes,
                 }
-                for name, value in results.items()
+                for name, meta in results_metadata.items()
             },
             "steps": {
                 step: {
                     "creates": sorted(info.creates),
                     "requires": sorted(info.requires),
                     "elapsed": info.elapsed,
-                    "timestamp": (datetime.fromtimestamp(info.timestamp).isoformat()),
+                    "timestamp": datetime.fromtimestamp(info.timestamp).isoformat(),
                 }
                 for step, info in metadata["step_metadata"].items()
             },
         }
-
-        return "\n".join(_format_toml_section(manifest))
+        return json.dumps(manifest, indent=2)
 
     @classmethod
-    def save(
-        cls, filepath: str, analysis: Any, force: bool = False, compress: bool = False
+    def _write_metadata(cls, tar: tarfile.TarFile, metadata: dict) -> None:
+        """Write metadata to the archive."""
+        cls._add_bytes_to_tar(tar, cls.METADATA_NAME, pickle.dumps(metadata))
+
+    @classmethod
+    def _write_parameters(cls, tar: tarfile.TarFile, parameters: Any) -> None:
+        """Write parameters to the archive."""
+        cls._add_bytes_to_tar(tar, "parameters.pkl", pickle.dumps(parameters))
+
+    @classmethod
+    def _write_manifest(
+        cls, tar: tarfile.TarFile, metadata: dict, results_metadata: dict
     ) -> None:
-        """Save analysis to yaflux archive format.
-
-        Parameters
-        ----------
-        filepath : str
-            Path to save the analysis. If it doesn't end in .yax, the extension will
-            be added
-        analysis : Any
-            Analysis object to save
-        force : bool, optional
-            Whether to overwrite existing file, by default False
-        compress : bool, optional
-            Whether to compress the archive (gzip), by default False
-        """
-        # Ensure correct file extension
-        if filepath.endswith(cls.EXTENSION) and compress:
-            filepath = filepath.replace(cls.EXTENSION, cls.COMPRESSED_EXTENSION)
-        elif filepath.endswith(cls.COMPRESSED_EXTENSION):
-            compress = True
-        elif not filepath.endswith(cls.EXTENSION):
-            if compress:
-                filepath = filepath + cls.COMPRESSED_EXTENSION
-            else:
-                filepath = filepath + cls.EXTENSION
-
-        if not force and os.path.exists(filepath):
-            raise FileExistsError(f"File already exists: '{filepath}'")
-
-        # Prepare metadata
-        yax_metadata = {
-            "version": cls.VERSION,
-            "parameters": analysis.parameters,
-            "completed_steps": list(analysis._completed_steps),
-            "step_metadata": analysis._results._metadata,
-            "result_keys": list(analysis._results._data.keys()),
-            "step_ordering": analysis._step_ordering,
-            "timestamp": datetime.now().timestamp(),
-        }
-
-        # Create tarfile
-        w_mode = "w:gz" if compress else "w"
-        with tarfile.open(filepath, w_mode) as tar:
-            # Add metadata
-            metadata_bytes = BytesIO(pickle.dumps(yax_metadata))
-            metadata_info = tarfile.TarInfo(cls.METADATA_NAME)
-            metadata_info.size = len(metadata_bytes.getvalue())
-            tar.addfile(metadata_info, metadata_bytes)
-
-            # Create and add manifest
-            manifest = cls._create_manifest(yax_metadata, analysis._results._data)
-            manifest_bytes = BytesIO(manifest.encode("utf-8"))
-            manifest_info = tarfile.TarInfo(cls.MANIFEST_NAME)
-            manifest_info.size = len(manifest_bytes.getvalue())
-            tar.addfile(manifest_info, manifest_bytes)
-
-            # Add parameters
-            parameters_bytes = BytesIO(pickle.dumps(analysis.parameters))
-            parameters_info = tarfile.TarInfo("parameters.pkl")
-            parameters_info.size = len(parameters_bytes.getvalue())
-            tar.addfile(parameters_info, parameters_bytes)
-
-            # Add results
-            for key, value in analysis._results._data.items():
-                result_bytes = BytesIO(pickle.dumps(value))
-                result_path = os.path.join(cls.RESULTS_DIR, f"{key}.pkl")
-                result_info = tarfile.TarInfo(result_path)
-                result_info.size = len(result_bytes.getvalue())
-                tar.addfile(result_info, result_bytes)
+        """Write manifest to the archive."""
+        manifest = cls._create_manifest(metadata, results_metadata)
+        cls._add_bytes_to_tar(tar, cls.MANIFEST_NAME, manifest.encode("utf-8"))
 
     @classmethod
-    def load(  # noqa: C901
-        cls,
-        filepath: str,
-        *,
-        no_results: bool = False,
-        select: list[str] | str | None = None,
-        exclude: list[str] | str | None = None,
-    ) -> tuple[dict[str, Any], dict[str, Any]]:
-        """Load analysis from yaflux archive format.
+    def _write_results(
+        cls, tar: tarfile.TarFile, results: dict, results_metadata: dict
+    ) -> None:
+        """Write results to the archive."""
+        for key, value in results.items():
+            serializer = SerializerRegistry.get_serializer(value)
+            result, metadata = serializer.serialize(value)
+            results_metadata[key] = metadata
 
-        Parameters
-        ----------
-        filepath : str
-            Path to load the analysis from
-        no_results : bool, optional
-            Only load metadata, by default False
-        select : Optional[List[str], str], optional
-            Only load specific results, by default None
-        exclude : Optional[List[str], str], optional
-            Skip specific results, by default None
+            result_path = os.path.join(cls.RESULTS_DIR, f"{key}.{metadata.format}")
 
-        Returns
-        -------
-        tuple[Dict[str, Any], Dict[str, Any]]
-            Metadata and results dictionaries
-        """
-        select = cls._normalize_input(select)
-        exclude = cls._normalize_input(exclude)
+            if isinstance(result, str):
+                tmp_name = result if not hasattr(result, "name") else result.name  # type: ignore
+                tar.add(tmp_name, arcname=result_path)
 
-        r_mode = "r:gz" if filepath.endswith(".gz") else "r"
-        with tarfile.open(filepath, r_mode) as tar:
-            # Load metadata
-            metadata_file = tar.extractfile(cls.METADATA_NAME)
-            if metadata_file is None:
-                raise ValueError(f"Invalid yaflux archive: missing {cls.METADATA_NAME}")
-            metadata = pickle.loads(metadata_file.read())
+                # clean up temp file
+                if hasattr(result, "name"):
+                    result.close()  # type: ignore
 
-            # Validate version
-            if "version" not in metadata:
-                raise YaxMissingVersionFileError(
-                    "Invalid yaflux archive: missing version in metadata"
-                )
+                os.unlink(tmp_name)
 
-            # Load parameters
+            else:
+                cls._add_bytes_to_tar(tar, result_path, result)
+
+    @classmethod
+    def _read_metadata(cls, tar: tarfile.TarFile) -> dict:
+        """Read metadata from the archive."""
+        metadata_file = tar.extractfile(cls.METADATA_NAME)
+        if metadata_file is None:
+            raise ValueError(f"Invalid yaflux archive: missing {cls.METADATA_NAME}")
+
+        metadata = pickle.loads(metadata_file.read())
+        if "version" not in metadata:
+            raise YaxMissingVersionFileError(
+                "Invalid yaflux archive: missing version in metadata"
+            )
+
+        return metadata
+
+    @classmethod
+    def _read_manifest(cls, tar: tarfile.TarFile) -> dict:
+        """Read manifest from the archive."""
+        manifest_file = tar.extractfile(cls.MANIFEST_NAME)
+        if manifest_file is None:
+            raise ValueError(f"Invalid yaflux archive: missing {cls.MANIFEST_NAME}")
+        return json.loads(manifest_file.read().decode("utf-8"))
+
+    @classmethod
+    def _read_parameters(cls, tar: tarfile.TarFile) -> Any:
+        """Read parameters from the archive."""
+        try:
             parameters_file = tar.extractfile("parameters.pkl")
             if parameters_file is None:
-                raise YaxMissingParametersFileError(
-                    "Invalid yaflux archive: missing parameters.pkl"
+                return None
+            return pickle.loads(parameters_file.read())
+        except KeyError:
+            return None
+
+    @classmethod
+    def _determine_results_to_load(
+        cls,
+        available_results: list[str],
+        select: list[str] | None,
+        exclude: list[str] | None,
+    ) -> set[str]:
+        """Determine which results should be loaded."""
+        if select is not None and exclude is not None:
+            raise ValueError("Cannot specify both select and exclude")
+
+        to_load = set(available_results)
+        if select is not None:
+            invalid = set(select) - set(available_results)
+            if invalid:
+                raise YaxMissingResultError(f"Requested results not found: {invalid}")
+            to_load = set(select)
+        elif exclude is not None:
+            to_load -= set(exclude)
+
+        return to_load
+
+    @classmethod
+    def _load_results(
+        cls, tar: tarfile.TarFile, to_load: set[str], manifest: dict
+    ) -> dict:
+        """Load selected results from the archive."""
+        results = {}
+        for key in to_load:
+            result_meta = manifest["results"][key]
+            result_metadata = SerializerMetadata(
+                format=result_meta["format"],
+                type_name=result_meta["type"],
+                module_name=result_meta["module"],
+                size_bytes=result_meta["size_bytes"],
+            )
+
+            result_path = os.path.join(
+                cls.RESULTS_DIR, f"{key}.{result_metadata.format}"
+            )
+
+            # Extract the BufferedIOReader from the tarfile
+            result_file = tar.extractfile(result_path)
+
+            if result_file is None:
+                raise YaxMissingResultError(f"Missing result file: {result_path}")
+
+            for serializer in SerializerRegistry._serializers:
+                if result_metadata.format == serializer.FORMAT:
+                    # Deserialize from the BufferedIOReader
+                    results[key] = serializer.deserialize(result_file, result_metadata)
+
+                    break
+            else:
+                raise ValueError(
+                    f"Unknown serialization format: {result_metadata.format}"
                 )
-            metadata["parameters"] = pickle.loads(parameters_file.read())
 
-            # Handle selective loading
-            if no_results:
-                return metadata, {}
+        return results
 
-            available_results = metadata["result_keys"]
-            if select is not None and exclude is not None:
-                raise ValueError("Cannot specify both select and exclude")
+    @classmethod
+    def _add_bytes_to_tar(cls, tar: tarfile.TarFile, path: str, data: bytes) -> None:
+        """Add bytes to a tarfile."""
+        bytes_io = BytesIO(data)
+        info = tarfile.TarInfo(path)
+        info.size = len(data)
+        tar.addfile(info, bytes_io)
 
-            # Determine which results to load
-            to_load = set(available_results)
-            if select is not None:
-                invalid = set(select) - set(available_results)
-                if invalid:
-                    raise YaxMissingResultError(
-                        f"Requested results not found: {invalid}"
-                    )
-                to_load = set(select)
-            if exclude is not None:
-                to_load -= set(exclude)
-
-            # Load selected results
-            results = {}
-            for key in to_load:
-                result_path = os.path.join(cls.RESULTS_DIR, f"{key}.pkl")
-                result_file = tar.extractfile(result_path)
-                if result_file is None:
-                    raise YaxMissingResultFileError(
-                        f"Missing result file: {result_path}"
-                    )
-                results[key] = pickle.loads(result_file.read())
-
-            return metadata, results
+    @staticmethod
+    def _normalize_input(options: list[str] | str | None) -> list[str] | None:
+        """Normalize input to a list."""
+        if isinstance(options, str):
+            return [options]
+        return options
 
     @classmethod
     def is_yaflux_archive(cls, filepath: str) -> bool:
@@ -237,10 +289,3 @@ class TarfileSerializer:
             filepath.endswith(cls.EXTENSION)
             or filepath.endswith(cls.COMPRESSED_EXTENSION)
         ) and tarfile.is_tarfile(filepath)
-
-    @staticmethod
-    def _normalize_input(options: list[str] | str | None) -> list[str] | None:
-        """Normalize input to a list."""
-        if isinstance(options, str):
-            return [options]
-        return options

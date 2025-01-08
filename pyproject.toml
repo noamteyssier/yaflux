@@ -1,6 +1,6 @@
 [project]
 name = "yaflux"
-version = "0.2.5"
+version = "0.3.1"
 description = "A lightweight, declarative framework for python analysis workflows."
 readme = "README.md"
 authors = [
@@ -11,7 +11,11 @@ requires-python = ">=3.10"
 
 [project.optional-dependencies]
 viz = ["graphviz>=0.20.3"]
-full = ["yaflux[viz]"]
+anndata = ["anndata>=0.7.6"]
+numpy = ["numpy>=2.0.0"]
+pandas = ["pandas>=2.0.0", "pyarrow>=18.0.0"]
+io = ["yaflux[anndata,numpy,pandas]"]
+full = ["yaflux[viz,io]"]
 
 [build-system]
 requires = ["hatchling"]
@@ -25,7 +29,10 @@ docs = [
     "sphinx-autodoc-typehints>=2.5.0",
     "sphinx>=8.1.3",
 ]
-testing = ["pytest>=8.3.4"]
+testing = [
+    "pytest>=8.3.4",
+    "yaflux[io]",    # for testing serialization
+]
 linting = ["ruff>=0.8.2"]
 type-checking = ["pyright>=1.1.390"]
 dev = [
