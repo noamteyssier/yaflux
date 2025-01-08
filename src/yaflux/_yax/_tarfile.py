@@ -256,11 +256,8 @@ class TarfileSerializer:
 
             for serializer in SerializerRegistry._serializers:
                 if result_metadata.format == serializer.FORMAT:
-
                     # Deserialize from the BufferedIOReader
-                    results[key] = serializer.deserialize(
-                        result_file, result_metadata
-                    )
+                    results[key] = serializer.deserialize(result_file, result_metadata)
 
                     break
             else:
